@@ -11,44 +11,75 @@ class LogOutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: InkWell(
-        onTap: () {
-          Get.defaultDialog(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal:  18.0),
+      child: Center(
+        child: InkWell(
+          onTap: () {
+         Get.defaultDialog(
               title: 'Logout From App',
-              middleText: 'Are you sure you need to logout ?',
-              textCancel: ' NO ',
-              textConfirm: ' YES ',
+              middleText: 'Are you sure you need to logout?',
+              titleStyle: TextStyle(fontSize: 16),
               buttonColor: Colors.grey,
               confirmTextColor: mainClr,
               cancelTextColor: mainClr,
               onCancel: () => Get.back(),
-              onConfirm: () => Get.offNamed(Routes.loginScreen));
-        },
-        child: Container(
-          padding: EdgeInsets.all(20),
-          decoration: BoxDecoration(border: Border.all(color: gryClr)),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withOpacity(.7)),
-                child: const Icon(
-                  Icons.logout,
-                  color: Colors.black,
+              onConfirm: () => Get.offNamed(Routes.loginScreen),
+              cancel: ElevatedButton(
+                onPressed: () => Get.back(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+                child: Text(
+                  'NO',
+                  style: TextStyle(color: mainClr),
                 ),
               ),
-              const SizedBox(
-                width: 10,
+              confirm: ElevatedButton(
+                onPressed: () => Get.offNamed(Routes.loginScreen),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+                child: Text(
+                  'YES',
+                  style: TextStyle(color: mainClr),
+                ),
               ),
-              TextUtils(
-                  text: logOut,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white)
-            ],
+            );
+
+                
+          },
+          child: Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(border: Border.all(color: gryClr, ),borderRadius: BorderRadius.circular(10)),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(.7)),
+                  child: const Icon(
+                    Icons.logout,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(
+                  width: 10,
+                ),
+                TextUtils(
+                    text: logOut,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white)
+              ],
+            ),
           ),
         ),
       ),

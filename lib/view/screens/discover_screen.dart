@@ -21,12 +21,12 @@ class DiscoverMovies extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-        child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(18.0),
-          child: Row(
+        child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Column(
@@ -56,28 +56,71 @@ class DiscoverMovies extends StatelessWidget {
                   )),
             ],
           ),
-        ),
-        SizedBox(
-          height: 25,
-        ),
-        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Padding(
-            padding: EdgeInsets.only(left: 18.0),
-            child: TextUtils(
+          SizedBox(
+            height: 25,
+          ),
+          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            TextUtils(
                 text: popularTxt,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Colors.white),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Container(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Obx(
-                  () {
+            const SizedBox(
+              height: 10,
+            ),
+            Container(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Obx(
+                    () {
+                      if (moviesTopRatedController.isLoading.value == true) {
+                        return Center(
+                          child: Lottie.asset(loadingAnimate),
+                        );
+                      } else {
+                        return SizedBox(
+                          width: double.infinity,
+                          height: 320,
+                          child: ListView.builder(
+                              itemCount: controller.movieList.length,
+                              scrollDirection: Axis.horizontal,
+                              itemBuilder: (context, index) => buildContainer(
+                                    onTap: () {
+                                      return Get.to(
+                                          MovieDetails(
+                                              getMovies:
+                                                  controller.movieList[index]),
+                                          transition: Transition.size,
+                                          duration: const Duration(
+                                              milliseconds: 400));
+                                    },
+                                    rate: controller
+                                            .movieList[index].voteAverage /
+                                        2,
+                                    height: 190,
+                                    width: 400,
+                                    image: urlImage +
+                                        controller
+                                            .movieList[index].backdropPath!,
+                                    title: controller.movieList[index].title,
+                                    voteAverage: controller
+                                        .movieList[index].voteAverage
+                                        .toString(),
+                                  )),
+                        );
+                      }
+                    },
+                  ),
+                  TextUtils(
+                      text: topRatedTxt,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Obx(() {
                     if (moviesTopRatedController.isLoading.value == true) {
                       return Center(
                         child: Lottie.asset(loadingAnimate),
@@ -85,151 +128,101 @@ class DiscoverMovies extends StatelessWidget {
                     } else {
                       return SizedBox(
                         width: double.infinity,
-                        height: 320,
-                        child: ListView.builder(
-                            itemCount: controller.movieList.length,
+                        height: 350,
+                        child: GridView.builder(
                             scrollDirection: Axis.horizontal,
+                            itemCount: moviesTopRatedController
+                                .moviesTopRatedList.length,
+                            gridDelegate:
+                                const SliverGridDelegateWithMaxCrossAxisExtent(
+                                    maxCrossAxisExtent: 400,
+                                    childAspectRatio: 2,
+                                    mainAxisSpacing: 6,
+                                    crossAxisSpacing: 6),
                             itemBuilder: (context, index) => buildContainer(
-                                  onTap: () {
-                                    return Get.to(
-                                        MovieDetails(
-                                            getMovies:
-                                                controller.movieList[index]),
-                                        transition: Transition.size,
-                                        duration:
-                                            const Duration(milliseconds: 400));
-                                  },
-                                  rate:
-                                      controller.movieList[index].voteAverage /
-                                          2,
+                                  width: 200,
                                   height: 190,
-                                  width: 400,
+                                  onTap: () => Get.to(
+                                      () => MovieDetails(
+                                          getMovies: moviesTopRatedController
+                                              .moviesTopRatedList[index]),
+                                      transition: Transition.size,
+                                      duration:
+                                          const Duration(milliseconds: 500)),
                                   image: urlImage +
-                                      controller.movieList[index].backdropPath!,
-                                  title: controller.movieList[index].title,
-                                  voteAverage: controller
-                                      .movieList[index].voteAverage
+                                      moviesTopRatedController
+                                          .moviesTopRatedList[index].posterPath,
+                                  title: moviesTopRatedController
+                                      .moviesTopRatedList[index].title,
+                                  rate: moviesTopRatedController
+                                          .moviesTopRatedList[index]
+                                          .voteAverage /
+                                      2,
+                                  voteAverage: moviesTopRatedController
+                                      .moviesTopRatedList[index].voteAverage
                                       .toString(),
                                 )),
                       );
                     }
-                  },
-                ),
-                const Padding(
-                  padding: EdgeInsets.only(left: 18.0),
-                  child: TextUtils(
-                      text: topRatedTxt,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Obx(() {
-                  if (moviesTopRatedController.isLoading.value == true) {
-                    return Center(
-                      child: Lottie.asset(loadingAnimate),
-                    );
-                  } else {
-                    return SizedBox(
-                      width: double.infinity,
-                      height: 350,
-                      child: GridView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: moviesTopRatedController
-                              .moviesTopRatedList.length,
-                          gridDelegate:
-                              const SliverGridDelegateWithMaxCrossAxisExtent(
-                                  maxCrossAxisExtent: 400,
-                                  childAspectRatio: 2,
-                                  mainAxisSpacing: 6,
-                                  crossAxisSpacing: 6),
-                          itemBuilder: (context, index) => buildContainer(
-                                width: 200,
-                                height: 190,
-                                onTap: () => Get.to(
-                                    () => MovieDetails(
-                                        getMovies: moviesTopRatedController
-                                            .moviesTopRatedList[index]),
-                                    transition: Transition.size,
-                                    duration:
-                                        const Duration(milliseconds: 500)),
-                                image: urlImage +
-                                    moviesTopRatedController
-                                        .moviesTopRatedList[index].posterPath,
-                                title: moviesTopRatedController
-                                    .moviesTopRatedList[index].title,
-                                rate: moviesTopRatedController
-                                        .moviesTopRatedList[index].voteAverage /
-                                    2,
-                                voteAverage: moviesTopRatedController
-                                    .moviesTopRatedList[index].voteAverage
-                                    .toString(),
-                              )),
-                    );
-                  }
-                }),
-                Padding(
-                  padding: EdgeInsets.only(left: 18.0),
-                  child: TextUtils(
+                  }),
+                  TextUtils(
                       text: queryMoviesTxt,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.white),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Obx(() {
-                  if (moviesQueryController.isLoading.value == true) {
-                    return Center(
-                      child: Lottie.asset(loadingAnimate),
-                    );
-                  } else {
-                    return SizedBox(
-                      width: double.infinity,
-                      height: 350,
-                      child: GridView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount:
-                              moviesQueryController.moviesQueryList.length,
-                          gridDelegate:
-                              const SliverGridDelegateWithMaxCrossAxisExtent(
-                                  maxCrossAxisExtent: 400,
-                                  childAspectRatio: 2,
-                                  mainAxisSpacing: 6,
-                                  crossAxisSpacing: 6),
-                          itemBuilder: (context, index) => buildContainer(
-                                width: 200,
-                                height: 190,
-                                onTap: () => Get.to(
-                                    () => MovieDetails(
-                                        getMovies: moviesQueryController
-                                            .moviesQueryList[index]),
-                                    transition: Transition.size,
-                                    duration:
-                                        const Duration(milliseconds: 500)),
-                                image: urlImage +
-                                    moviesQueryController
-                                        .moviesQueryList[index].posterPath,
-                                title: moviesQueryController
-                                    .moviesQueryList[index].title,
-                                rate: moviesQueryController
-                                        .moviesQueryList[index].voteAverage /
-                                    2,
-                                voteAverage: moviesQueryController
-                                    .moviesQueryList[index].voteAverage
-                                    .toString(),
-                              )),
-                    );
-                  }
-                }),
-              ],
-            ),
-          )
-        ]),
-      ],
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Obx(() {
+                    if (moviesQueryController.isLoading.value == true) {
+                      return Center(
+                        child: Lottie.asset(loadingAnimate),
+                      );
+                    } else {
+                      return SizedBox(
+                        width: double.infinity,
+                        height: 350,
+                        child: GridView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount:
+                                moviesQueryController.moviesQueryList.length,
+                            gridDelegate:
+                                const SliverGridDelegateWithMaxCrossAxisExtent(
+                                    maxCrossAxisExtent: 400,
+                                    childAspectRatio: 2,
+                                    mainAxisSpacing: 6,
+                                    crossAxisSpacing: 6),
+                            itemBuilder: (context, index) => buildContainer(
+                                  width: 200,
+                                  height: 190,
+                                  onTap: () => Get.to(
+                                      () => MovieDetails(
+                                          getMovies: moviesQueryController
+                                              .moviesQueryList[index]),
+                                      transition: Transition.size,
+                                      duration:
+                                          const Duration(milliseconds: 500)),
+                                  image: urlImage +
+                                      moviesQueryController
+                                          .moviesQueryList[index].posterPath,
+                                  title: moviesQueryController
+                                      .moviesQueryList[index].title,
+                                  rate: moviesQueryController
+                                          .moviesQueryList[index].voteAverage /
+                                      2,
+                                  voteAverage: moviesQueryController
+                                      .moviesQueryList[index].voteAverage
+                                      .toString(),
+                                )),
+                      );
+                    }
+                  }),
+                ],
+              ),
+            )
+          ]),
+        ],
+      ),
     ));
   }
 }
