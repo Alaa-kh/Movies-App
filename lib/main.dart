@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -23,12 +22,7 @@ class MoviesApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: 
-      FirebaseAuth.instance.currentUser != null ||
-              GetStorage().read<bool>('auth') == true
-          ? Routes.splashScreen
-          :
-          Routes.mainScreen,
+      initialRoute: Routes.splashScreen,
       getPages: AppRoutes.routes,
     );
   }

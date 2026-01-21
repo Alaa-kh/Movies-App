@@ -82,10 +82,12 @@ class NotificationServices {
         ),
         schedule: schedual
             ? NotificationInterval(
-                interval: interval,
+                interval: interval != null ? Duration(seconds: interval) : null,
                 timeZone:
                     await AwesomeNotifications().getLocalTimeZoneIdentifier(),
-                preciseAlarm: true)
+                preciseAlarm: true,
+              )
+
             : null);
   }
 }

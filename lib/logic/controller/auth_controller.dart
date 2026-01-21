@@ -74,7 +74,7 @@ class AuthController extends GetxController {
         NotificationServices.showNotification(
           title: 'You Are Logged In Movies App',
           body: 'logged in at :' +
-              DateFormat(' dd-MM-yyyy hh:mm').format(DateTime.now()),
+              DateFormat('dd-MM-yyyy hh:mm').format(DateTime.now()),
         );
       });
     } on FirebaseAuthException catch (error) {

@@ -16,7 +16,6 @@ const String forgotPass = 'Forgot Password?';
 const String or = 'OR';
 const String signUp = 'Sign Up';
 const String createAccount = 'Create Account';
-const String space = '_________________________';
 const String forgot = 'Forgot';
 const String send = 'SEND';
 const String logOut = 'Logout';

@@ -168,20 +168,9 @@ class SignUpScreen extends StatelessWidget {
                     const SizedBox(
                       height: 10,
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          space,
-                          style: TextStyle(color: Colors.grey.shade300),
-                        ),
-                        const Text(
-                          or,
-                          style: TextStyle(height: 2.5),
-                        ),
-                        Text(space,
-                            style: TextStyle(color: Colors.grey.shade300)),
-                      ],
+                    const Text(
+                      or,
+                      style: TextStyle(height: 2.5),
                     ),
                     const SizedBox(
                       height: 10,
