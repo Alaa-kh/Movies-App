@@ -11,8 +11,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationServices.initializenoti();
   await GetStorage.init();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(MoviesApp());
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(const MoviesApp());
 }
 
 class MoviesApp extends StatelessWidget {
@@ -22,7 +24,7 @@ class MoviesApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: Routes.splashScreen,
+      initialRoute: Routes.authGate,
       getPages: AppRoutes.routes,
     );
   }
