@@ -36,12 +36,12 @@ class LogOutScreen extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF2A2A2A).withOpacity(.95),
+                      color: const Color(0xFF2A2A2A).withValues(alpha: .95),
                       borderRadius: BorderRadius.circular(22),
-                      border: Border.all(color: Colors.white.withOpacity(.10)),
+                      border: Border.all(color: Colors.white.withValues(alpha: .10)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(.22),
+                          color: Colors.black.withValues(alpha: .22),
                           blurRadius: 22,
                           offset: const Offset(0, 14),
                         ),
@@ -55,8 +55,8 @@ class LogOutScreen extends StatelessWidget {
                           height: 64,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: mainClr.withOpacity(.12),
-                            border: Border.all(color: mainClr.withOpacity(.25)),
+                            color: mainClr.withValues(alpha:  .12),
+                            border: Border.all(color: mainClr.withValues(alpha:.25)),
                           ),
                           child: const Icon(
                             Icons.logout_rounded,
@@ -91,7 +91,7 @@ class LogOutScreen extends StatelessWidget {
                                 onPressed: () => Get.back(),
                                 style: OutlinedButton.styleFrom(
                                   side: BorderSide(
-                                    color: Colors.white.withOpacity(.22),
+                                    color: Colors.white.withValues(alpha: .22),
                                   ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(14),
@@ -162,16 +162,16 @@ class LogOutScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(18),
                 gradient: LinearGradient(
                   colors: [
-                    Colors.white.withOpacity(.14),
-                    Colors.white.withOpacity(.06),
+                    Colors.white.withValues(alpha:  .14),
+                    Colors.white.withValues(alpha:  .06),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                border: Border.all(color: Colors.white.withOpacity(.16)),
+                border: Border.all(color: Colors.white.withValues(alpha: .16)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(.22),
+                    color: Colors.black.withValues(alpha: .22),
                     blurRadius: 18,
                     offset: const Offset(0, 10),
                   ),
@@ -184,8 +184,8 @@ class LogOutScreen extends StatelessWidget {
                     height: 44,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white.withOpacity(.12),
-                      border: Border.all(color: Colors.white.withOpacity(.12)),
+                      color: Colors.white.withValues(alpha: .12),
+                      border: Border.all(color: Colors.white.withValues(alpha: .12)),
                     ),
                     child: const Icon(Icons.logout, color: Colors.white),
                   ),
@@ -200,7 +200,7 @@ class LogOutScreen extends StatelessWidget {
                   ),
                   Icon(
                     Icons.chevron_right,
-                    color: Colors.white.withOpacity(.7),
+                    color: Colors.white.withValues(alpha: .7),
                   ),
                 ],
               ),

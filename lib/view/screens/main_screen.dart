@@ -33,28 +33,28 @@ class MainScreen extends StatelessWidget {
               controller.currentIndex.value = value;
             },
             height: 50,
-            backgroundColor: Colors.black.withOpacity(.1),
-            color: Colors.white.withOpacity(.1),
-            buttonBackgroundColor: Colors.white.withOpacity(.2),
+            backgroundColor: Colors.black.withValues(alpha: .1),
+            color: Colors.white.withValues(alpha: .1),
+            buttonBackgroundColor: Colors.white.withValues(alpha: .2),
             items: [
               Icon(
                 Icons.home,
-                color: Colors.white.withOpacity(.7),
+                color: Colors.white.withValues(alpha: .7),
                 size: 30,
               ),
               Icon(
                 Icons.movie_creation_outlined,
-                color: Colors.white.withOpacity(.7),
+                color: Colors.white.withValues(alpha: .7),
                 size: 30,
               ),
               Icon(
                 Icons.favorite,
-                color: Colors.white.withOpacity(.7),
+                color: Colors.white.withValues(alpha: .7),
                 size: 30,
               ),
               Icon(
                 Icons.logout,
-                color: Colors.white.withOpacity(.7),
+                color: Colors.white.withValues(alpha: .7),
                 size: 30,
               ),
             ]),

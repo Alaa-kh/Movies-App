@@ -47,7 +47,7 @@ class DiscoverMovies extends StatelessWidget {
               Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.grey.shade400.withOpacity(.2),
+                    color: Colors.grey.shade400.withValues(alpha: .2),
                   ),
                   width: 50,
                   child: const Icon(

@@ -31,7 +31,7 @@ class MoviesScreen extends StatelessWidget {
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
-                        color: Colors.grey.shade400.withOpacity(.2),
+                        color: Colors.grey.shade400.withValues(alpha: .2),
                       ),
                       child: TextField(
                         style: const TextStyle(color: Colors.white),
@@ -65,7 +65,7 @@ class MoviesScreen extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.grey.shade400.withOpacity(.2),
+                      color: Colors.grey.shade400.withValues(alpha: .2),
                     ),
                     width: 50,
                     height: 50,

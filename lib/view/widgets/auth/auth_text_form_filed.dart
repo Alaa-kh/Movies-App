@@ -39,7 +39,7 @@ class AuthTextFormField extends StatelessWidget {
               decoration: BoxDecoration(
                 boxShadow: [
                   BoxShadow(
-                    color: gryClr.withOpacity(0.3),
+                    color: gryClr.withValues(alpha: 0.3),
                     spreadRadius: 1,
                     blurRadius: 4,
                     offset: const Offset(0, 4),

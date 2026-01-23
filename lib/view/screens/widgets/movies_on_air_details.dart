@@ -51,7 +51,7 @@ class MoviesOnAirDetails extends StatelessWidget {
                             padding: const EdgeInsets.all(2),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.grey.shade100.withOpacity(.2),
+                              color: Colors.grey.shade100.withValues(alpha: .2),
                             ),
                             child: IconButton(
                               iconSize: 30,
