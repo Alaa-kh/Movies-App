@@ -20,39 +20,39 @@ class MoviesScreen extends StatelessWidget {
         child: Column(children: [
       Row(
         children: [
-          Padding(
+         Padding(
             padding: const EdgeInsets.all(18.0),
             child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(30),
-                  color: Colors.grey.shade400.withOpacity(.2),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+                color: Colors.grey.shade400.withOpacity(.2),
+              ),
+              width: 300,
+              child: TextField(
+                style: const TextStyle(color: Colors.white),
+                controller: controller.searchTextController,
+                onChanged: (searchName) {
+                  controller.addSearchToList(searchName);
+                },
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  enabledBorder:
+                      InputBorder.none,
+                  focusedBorder: InputBorder.none, 
+                  suffixIcon: controller.searchTextController.text.isEmpty
+                      ? IconButton(
+                          onPressed: controller.clearSearch,
+                          icon: const Icon(Icons.close, color: Colors.white),
+                        )
+                      : null,
+                  contentPadding: const EdgeInsets.all(12),
+                  hintText: searchTxt,
+                  hintStyle: const TextStyle(color: gryClr),
                 ),
-                width: 300,
-                child: TextField(
-                  style: TextStyle(color: Colors.white),
-                  controller: controller.searchTextController,
-                  onChanged: (searchName) {
-                    controller.addSearchToList(searchName);
-                  },
-                  decoration: InputDecoration(
-                      focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(),
-                          borderRadius: BorderRadius.circular(10)),
-                      suffixIcon: controller.searchTextController.text.isEmpty
-                          ? IconButton(
-                              onPressed: () {
-                                controller.clearSearch();
-                              },
-                              icon: const Icon(
-                                Icons.close,
-                                color: Colors.white,
-                              ))
-                          : null,
-                      contentPadding: const EdgeInsets.all(12),
-                      hintText: searchTxt,
-                      hintStyle: const TextStyle(color: gryClr)),
-                )),
+              ),
+            ),
           ),
+
           Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
