@@ -9,22 +9,45 @@ import 'package:movies/view/widgets/text_utils.dart';
 import '../../logic/controller/auth_controller.dart';
 import '../../utils/strings.dart';
 
-final controller = Get.find<AuthController>();
-final fromKey = GlobalKey<FormState>();
-final emailController = TextEditingController();
-final passwordController = TextEditingController();
+class LogInScreen extends StatefulWidget {
+  const LogInScreen({super.key});
 
-class LogInScreen extends StatelessWidget {
+  @override
+  State<LogInScreen> createState() => _LogInScreenState();
+}
+
+class _LogInScreenState extends State<LogInScreen> {
+  final AuthController controller = Get.find<AuthController>();
+
+  final formKey = GlobalKey<FormState>();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-          child: SingleChildScrollView(
+      body: SingleChildScrollView(
         child: Column(
           children: [
             Container(
-              child: Padding(
+              height: 350,
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(0),
+                  bottomRight: Radius.circular(400),
+                ),
+              ),
+              child: const Padding(
                 padding: EdgeInsets.only(left: 18, top: 50),
                 child: TextUtils(
                   text: logIn,
@@ -33,156 +56,144 @@ class LogInScreen extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              height: 350,
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(00),
-                      bottomRight: Radius.circular(400))),
             ),
             Form(
-              key: fromKey,
+              key: formKey,
               child: Padding(
                 padding: const EdgeInsets.all(18.0),
                 child: Column(
                   children: [
+                    AuthTextFormField(
+                      hintText: enterEmail,
+                      controller: emailController,
+                      obscureText: false,
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
+                      validator: (value) {
+                        final v = value ?? '';
+                        if (v.isEmpty) return 'Email is required';
+                        if (!RegExp(validationEmail).hasMatch(v)) {
+                          return 'Invalid Email';
+                        }
+                        return null;
+                      },
+                      prefixIcon:
+                          const Icon(Icons.email_outlined, color: gryClr),
+                    ),
+                    const SizedBox(height: 20),
                     GetBuilder<AuthController>(
-                      builder: (_) => AuthTextFormField(
-                        hintText: enterEmail,
-                        controller: emailController,
-                        obscureText: false,
+                      builder: (c) => AuthTextFormField(
+                        hintText: password,
+                        controller: passwordController,
+                        obscureText: !c.isVisibility,
+                        textInputAction: TextInputAction.done,
                         validator: (value) {
-                          if (!RegExp(validationEmail).hasMatch(value)) {
-                            return 'Invalid Email';
-                          } else {
-                            return null;
+                          final v = value ?? '';
+                          if (v.length < 6) {
+                            return 'Password should be longer or equal to 6 characters';
                           }
+                          return null;
                         },
-                        prefixIcon: const Icon(
-                          Icons.email_outlined,
-                          color: gryClr,
+                        prefixIcon:
+                            const Icon(Icons.lock_outline, color: gryClr),
+                        suffixIcon: IconButton(
+                          onPressed: c.visibility,
+                          icon: Icon(
+                            c.isVisibility
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: gryClr,
+                          ),
                         ),
                       ),
                     ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    GetBuilder<AuthController>(
-                        builder: (_) => AuthTextFormField(
-                            hintText: password,
-                            controller: passwordController,
-                            obscureText: controller.isVisibility ? false : true,
-                            validator: (value) {
-                              if (value.toString().length < 6) {
-                                return 'Password should be longer or equal to 6 characters';
-                              } else {
-                                return null;
-                              }
-                            },
-                            prefixIcon: const Icon(
-                              Icons.lock_outline,
-                              color: gryClr,
-                            ),
-                            suffixIcon: IconButton(
-                                onPressed: () {
-                                  controller.visibility();
-                                },
-                                icon: controller.isVisibility
-                                    ? const Icon(
-                                        Icons.visibility,
-                                        color: gryClr,
-                                      )
-                                    : const Icon(
-                                        Icons.visibility_off,
-                                        color: gryClr,
-                                      )))),
-                    const SizedBox(
-                      height: 10,
-                    ),
+                    const SizedBox(height: 10),
                     Align(
                       alignment: Alignment.centerRight,
                       child: GestureDetector(
                         onTap: () {
-                          Get.to(ForgotScreen(),
-                              transition: Transition.downToUp,
-                              duration: const Duration(milliseconds: 500));
+                          Get.to(
+                            ForgotScreen(),
+                            transition: Transition.downToUp,
+                            duration: const Duration(milliseconds: 500),
+                          );
                         },
                         child: const TextUtils(
-                            text: forgotPass,
-                            fontSize: 13,
-                            fontWeight: FontWeight.normal,
-                            color: gryClr),
+                          text: forgotPass,
+                          fontSize: 13,
+                          fontWeight: FontWeight.normal,
+                          color: gryClr,
+                        ),
                       ),
                     ),
-                    const SizedBox(
-                      height: 72,
-                    ),
-                    Container(
+                    const SizedBox(height: 72),
+                    SizedBox(
                       width: double.infinity,
                       height: 50,
-                      child: GetBuilder<AuthController>(
-                        builder: (_) => ElevatedButton(
-                            style: ButtonStyle(
-                                backgroundColor:
-                                    MaterialStateProperty.all(mainClr),
-                                shape: MaterialStateProperty.all<
-                                        RoundedRectangleBorder>(
-                                    RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5.0),
-                                ))),
-                            onPressed: () {
-                              if (fromKey.currentState!.validate()) {
-                                controller.logInUsingFirebase(
-                                    email: emailController.text.trim(),
-                                    password: passwordController.text);
-                              }
-                            },
-                            child: const TextUtils(
-                                text: logIn,
-                                fontSize: 15,
-                                fontWeight: FontWeight.normal,
-                                color: Colors.white)),
+                      child: ElevatedButton(
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all(mainClr),
+                          shape: MaterialStateProperty.all<
+                              RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5.0),
+                            ),
+                          ),
+                        ),
+                        onPressed: () {
+                          if (formKey.currentState!.validate()) {
+                            controller.logInUsingFirebase(
+                              email: emailController.text.trim(),
+                              password: passwordController.text,
+                            );
+                          }
+                        },
+                        child: const TextUtils(
+                          text: logIn,
+                          fontSize: 15,
+                          fontWeight: FontWeight.normal,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
-                    const SizedBox(
-                      height: 10,
+                    const SizedBox(height: 10),
+                    const Text(or, style: TextStyle(height: 2.5)),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: TextButton(
+                        style: ButtonStyle(
+                          shape: MaterialStateProperty.all<
+                              RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5.0),
+                              side: const BorderSide(color: gryClr),
+                            ),
+                          ),
+                        ),
+                        onPressed: () {
+                          Get.offAll(
+                            SignUpScreen(),
+                            transition: Transition.zoom,
+                            duration: const Duration(milliseconds: 700),
+                          );
+                        },
+                        child: const TextUtils(
+                          text: signUp,
+                          fontSize: 15,
+                          fontWeight: FontWeight.normal,
+                          color: mainClr,
+                        ),
+                      ),
                     ),
-                    const Text(
-                      or,
-                      style: TextStyle(height: 2.5),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Container(
-                        width: double.infinity,
-                        height: 50,
-                        child: TextButton(
-                          style: ButtonStyle(
-                              shape: MaterialStateProperty.all<
-                                      RoundedRectangleBorder>(
-                                  RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5.0),
-                                      side: const BorderSide(color: gryClr)))),
-                          child: const TextUtils(
-                              text: signUp,
-                              fontSize: 15,
-                              fontWeight: FontWeight.normal,
-                              color: mainClr),
-                          onPressed: () {
-                            Get.offAll(SignUpScreen(),
-                                transition: Transition.zoom,
-                                duration: const Duration(seconds: 1));
-                          },
-                        ))
                   ],
                 ),
               ),
             )
           ],
         ),
-      )),
+      ),
     );
   }
 }

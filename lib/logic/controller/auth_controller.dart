@@ -15,7 +15,6 @@ class AuthController extends GetxController {
 
   void visibility() {
     isVisibility = !isVisibility;
-
     update();
   }
 

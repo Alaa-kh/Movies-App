@@ -18,8 +18,7 @@ class ForgotScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-          child: SingleChildScrollView(
+      body: SingleChildScrollView(
         child: Column(
           children: [
             Container(
@@ -66,7 +65,7 @@ class ForgotScreen extends StatelessWidget {
                       controller: emailController,
                       obscureText: false,
                       validator: (value) {
-                        if (!RegExp(validationEmail).hasMatch(value)) {
+                        if (!RegExp(validationEmail).hasMatch(value!)) {
                           return 'Invalid Email';
                         } else {
                           return null;
@@ -110,7 +109,7 @@ class ForgotScreen extends StatelessWidget {
             )
           ],
         ),
-      )),
+      ),
     );
   }
 }
