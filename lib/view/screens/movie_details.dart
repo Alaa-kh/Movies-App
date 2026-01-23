@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:movies/utils/animation/motions.dart';
 
 import 'package:movies/view/widgets/text_utils.dart';
 import 'package:readmore/readmore.dart';
@@ -44,7 +45,7 @@ class MovieDetails extends StatelessWidget {
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
-                          ),
+                          ).fadeUp(),
                         ),
                       ],
                     ),

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
+import 'package:movies/utils/animation/motions.dart';
 import 'package:movies/utils/strings.dart';
-import 'package:movies/view/screens/movies_screen.dart';
 import 'package:movies/view/screens/widgets/favorite_item.dart';
+import 'package:movies/view/screens/widgets/movies_on_air_details.dart';
 
 import '../../logic/controller/movies_on_air_controller.dart';
 import '../../utils/animations_string.dart';
@@ -35,7 +36,7 @@ class FavorieScreen extends StatelessWidget {
                 () => MoviesOnAirDetails(
                   getMovies: item,
                   movieId: item.id,
-                ),
+                ).fadeUp(),
                 transition: Transition.size,
                 duration: const Duration(milliseconds: 500),
               ),
@@ -53,7 +54,7 @@ class FavorieScreen extends StatelessWidget {
             );
           },
           itemCount: controller.favoriteList.length,
-        );
+        ).fadeUp();
       }),
     );
   }
