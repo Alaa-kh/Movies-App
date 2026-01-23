@@ -8,43 +8,53 @@ import 'package:movies/view/screens/widgets/favorite_item.dart';
 import '../../logic/controller/movies_on_air_controller.dart';
 import '../../utils/animations_string.dart';
 
-final controller = Get.put(MoviesOnAirController());
+final MoviesOnAirController controller = Get.put(MoviesOnAirController());
 
 class FavorieScreen extends StatelessWidget {
   const FavorieScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      if (controller.favoriteList.isEmpty) {
-        return Center(child: Lottie.asset(favoriteAnimate, width: 200));
-      } else {
-        return Container(
-            child: ListView.separated(
-                itemBuilder: (context, index) {
-                  return buildFavItem(
-                      onTap: () => Get.to(
-                          () => MoviesOnAirDetails(
-                                getMovies: controller.favoriteList[index],
-                                movieId: controller.favoriteList[index].id,
-                              ),
-                          transition: Transition.size,
-                          duration: const Duration(milliseconds: 500)),
-                      image:
-                          urlImage + controller.favoriteList[index].posterPath,
-                      voteAverage: controller.favoriteList[index].voteAverage,
-                      title: controller.favoriteList[index].name,
-                      productid: controller.favoriteList[index].id,
-                      rate: controller.favoriteList[index].voteAverage / 2);
-                },
-                separatorBuilder: (context, index) {
-                  return const Divider(
-                    color: Colors.grey,
-                    thickness: .5,
-                  );
-                },
-                itemCount: controller.favoriteList.length));
-      }
-    });
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Obx(() {
+        if (controller.favoriteList.isEmpty) {
+          return Center(
+            child: Lottie.asset(
+              favoriteAnimate,
+              width: 200,
+            ),
+          );
+        }
+
+        return ListView.separated(
+          itemBuilder: (context, index) {
+            final item = controller.favoriteList[index];
+            return buildFavItem(
+              onTap: () => Get.to(
+                () => MoviesOnAirDetails(
+                  getMovies: item,
+                  movieId: item.id,
+                ),
+                transition: Transition.size,
+                duration: const Duration(milliseconds: 500),
+              ),
+              image: urlImage + item.posterPath,
+              voteAverage: item.voteAverage,
+              title: item.name,
+              productid: item.id,
+              rate: item.voteAverage / 2,
+            );
+          },
+          separatorBuilder: (context, index) {
+            return const Divider(
+              color: Colors.grey,
+              thickness: .5,
+            );
+          },
+          itemCount: controller.favoriteList.length,
+        );
+      }),
+    );
   }
 }
