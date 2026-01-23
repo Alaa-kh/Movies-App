@@ -1,0 +1,1812 @@
+محتوى الملفات 
+https://github.com/Alaa-kh/Movies-App/blob/main/lib/main.dart
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:movies/router/routers.dart';
+
+import 'firebase_options.dart';
+import 'notification.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationServices.initializenoti();
+  await GetStorage.init();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(const MoviesApp());
+}
+
+class MoviesApp extends StatelessWidget {
+  const MoviesApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return GetMaterialApp(
+      debugShowCheckedModeBanner: false,
+      initialRoute: Routes.authGate,
+      getPages: AppRoutes.routes,
+    );
+  }
+}
+https://github.com/Alaa-kh/Movies-App/blob/main/lib/logic/binding/auth_binding.dart
+import 'package:get/get.dart';
+
+import '../controller/auth_controller.dart';
+
+class AuthBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.put(AuthController());
+  }
+}
+https://github.com/Alaa-kh/Movies-App/blob/main/lib/logic/binding/movies_binding.dart
+import 'package:get/get.dart';
+
+import '../controller/movies_controller.dart';
+import '../controller/movies_query_controller.dart';
+import '../controller/movies_top_controller.dart';
+import '../controller/movies_on_air_controller.dart';
+
+class MoviesBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.put(MoviesController());
+    Get.lazyPut(() => MoviesTopRatedController());
+    Get.lazyPut(() => MoviesQueryController());
+    Get.lazyPut(() => MoviesOnAirController());
+  }
+}
+https://github.com/Alaa-kh/Movies-App/blob/main/lib/logic/controller/auth_controller.dart
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import '../../notification.dart';
+import '../../router/routers.dart';
+import 'package:intl/intl.dart';
+
+class AuthController extends GetxController {
+  final GetStorage authBox = GetStorage();
+  var displayUserName = ''.obs;
+  bool isSignedIn = false;
+  FirebaseAuth auth = FirebaseAuth.instance;
+  bool isVisibility = false;
+
+  void visibility() {
+    isVisibility = !isVisibility;
+
+    update();
+  }
+
+  void signUpUsingFirebase(
+      {required String name,
+      required String email,
+      required String password}) async {
+    try {
+      await auth
+          .createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      )
+          .then((value) {
+        displayUserName.value = name;
+        auth.currentUser!.updateDisplayName(displayUserName.value);
+      });
+      update();
+      Get.offNamed(Routes.mainScreen);
+    } on FirebaseAuthException catch (error) {
+      String title = error.code.replaceAll(RegExp('-'), ' ').capitalize!;
+      String message = '';
+
+      if (error.code == 'weak-password') {
+        message = 'The password provided is too weak..';
+      } else if (error.code == 'email-already-in-use') {
+        message = 'The account already exists for that email..';
+      } else {
+        message = error.message.toString();
+      }
+
+      Get.snackbar(title, message,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM);
+    } catch (error) {
+      Get.snackbar('Error !', error.toString(),
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM);
+    }
+  }
+
+  void logInUsingFirebase(
+      {required String email, required String password}) async {
+    try {
+      await auth
+          .signInWithEmailAndPassword(email: email, password: password)
+          .then((value) {
+        displayUserName.value = auth.currentUser!.displayName!;
+        isSignedIn = true;
+        authBox.write('auth', isSignedIn);
+        update();
+        Get.offNamed(Routes.mainScreen);
+
+        NotificationServices.showNotification(
+          title: 'You Are Logged In Movies App',
+          body: 'logged in at :' +
+              DateFormat('dd-MM-yyyy hh:mm').format(DateTime.now()),
+        );
+      });
+    } on FirebaseAuthException catch (error) {
+      String title = error.code.replaceAll(RegExp('-'), ' ').capitalize!;
+      String message = '';
+      if (error.code == 'user-not-found') {
+        message =
+            "Account doesn't exists for that $email.. Create your account by signing up..";
+      } else if (error.code == 'wrong-password') {
+        message = 'Invalid Password... Please try again!';
+      } else {
+        message = error.message.toString();
+      }
+
+      Get.snackbar(title, message,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM);
+    } catch (error) {
+      Get.snackbar('Error !', error.toString(),
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM);
+    }
+  }
+
+  void resetPassword(String email) async {
+    try {
+      await auth.sendPasswordResetEmail(email: email);
+
+      update();
+      Get.back();
+    } on FirebaseAuthException catch (error) {
+      String title = error.code.replaceAll(RegExp('-'), ' ').capitalize!;
+      String message = '';
+      if (error.code == 'user-not-found') {
+        message =
+            "Account doesn't exists for that $email.. Create your account by signing up..";
+      } else {
+        message = error.message.toString();
+      }
+
+      Get.snackbar(title, message,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM);
+    } catch (error) {
+      Get.snackbar('Error !', error.toString(),
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM);
+    }
+  }
+}
+https://github.com/Alaa-kh/Movies-App/blob/main/lib/logic/controller/movies_controller.dart
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:movies/logic/model/movies_model.dart';
+
+import '../../view/screens/favorite_screen.dart';
+import '../../view/screens/logout_screen.dart';
+import '../../view/screens/discover_screen.dart';
+import '../../view/screens/movies_screen.dart';
+import '../services/movies_services.dart';
+
+class MoviesController extends GetxController {
+  List<Result> movieList = [];
+  var isLoading = true.obs;
+  @override
+  void onInit() {
+    super.onInit();
+    getMovies();
+  }
+
+  void getMovies() async {
+    final GetMoviesModel movies = await FetchData.getMovies();
+    final List<Result> getMoviesResults = movies.results;
+
+    try {
+      isLoading(true);
+      if (getMoviesResults.isNotEmpty) {
+        movieList.addAll(getMoviesResults);
+      }
+    } finally {
+      isLoading(false);
+    }
+  }
+
+  var searchList = <Result>[].obs;
+  TextEditingController searchTextController = TextEditingController();
+
+// Search Bar Logic
+
+  void addSearchToList(String searchName) {
+    searchName = searchName.toLowerCase();
+
+    searchList.value = movieList.where((value) {
+      var searchTitle = value.title.toLowerCase();
+      return searchTitle.contains(searchName);
+    }).toList();
+
+    update();
+  }
+
+  void clearSearch() {
+    searchTextController.clear();
+    addSearchToList('');
+  }
+
+  RxInt currentIndex = 0.obs;
+
+  final tabs = [
+    DiscoverMovies(),
+    MoviesScreen(),
+    FavorieScreen(),
+    LogOutScreen(),
+  ].obs;
+}
+https://github.com/Alaa-kh/Movies-App/blob/main/lib/logic/controller/movies_on_air_controller.dart
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:movies/logic/model/movies_on_air_model.dart';
+import 'package:movies/logic/services/movies_on_air_services.dart';
+
+class MoviesOnAirController extends GetxController {
+  var moviesOnAirList = <Result>[].obs;
+  var searchList = <Result>[].obs;
+  var favoriteList = <Result>[].obs;
+  var strorage = GetStorage();
+  TextEditingController searchTextController = TextEditingController();
+  var isLoading = true.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+
+    List? storedShoppings = strorage.read<List>('isFavoritesList');
+    if (storedShoppings != null) {
+      favoriteList =
+          storedShoppings.map((value) => Result.fromJson(value)).toList().obs;
+    }
+
+    getOnAirMovies();
+  }
+
+  void getOnAirMovies() async {
+    final GetMoviesOnAirModel movies =
+        await MoviesOnAirServices.getMoviesOnAir();
+    final List<Result> getMoviesResults = movies.results;
+
+    try {
+      isLoading(true);
+      if (getMoviesResults.isNotEmpty) {
+        moviesOnAirList.addAll(getMoviesResults);
+      }
+    } finally {
+      isLoading(false);
+    }
+  }
+
+// Search Bar Logic
+
+  void addSearchToList(String searchName) {
+    searchName = searchName.toLowerCase();
+
+    searchList.value = moviesOnAirList.where((value) {
+      var searchTitle = value.name.toLowerCase();
+      return searchTitle.contains(searchName);
+    }).toList();
+
+    update();
+  }
+
+  void clearSearch() {
+    searchTextController.clear();
+    addSearchToList('');
+  }
+
+  void favoriteMovie(int movieId) async {
+    var existingIndex =
+        favoriteList.indexWhere((element) => element.id == movieId);
+    if (existingIndex >= 0) {
+      favoriteList.removeAt(existingIndex);
+      await strorage.remove('isFavoritesList');
+    } else {
+      favoriteList
+          .add(moviesOnAirList.firstWhere((element) => element.id == movieId));
+
+      await strorage.write('isFavoritesList', favoriteList);
+    }
+  }
+
+  bool isFavorite(int movieId) {
+    return favoriteList.any((element) => element.id == movieId);
+  }
+}
+https://github.com/Alaa-kh/Movies-App/blob/main/lib/logic/controller/movies_query_controller.dart
+import 'package:get/get.dart';
+
+import '../model/movies_query_model.dart';
+import '../services/movies_query_services.dart';
+
+class MoviesQueryController extends GetxController {
+  List<Result> moviesQueryList = [];
+  var isLoading = true.obs;
+  @override
+  void onInit() {
+    super.onInit();
+    getMoviesQuery();
+  }
+
+  void getMoviesQuery() async {
+    final GetMoviesQueryModel getMoviesQuery =
+        await MoviesQueryServices.getMoviesQuery();
+    final List<Result> getMoviesQueryResults = getMoviesQuery.results;
+    try {
+      isLoading(true);
+      if (getMoviesQueryResults.isNotEmpty) {
+        moviesQueryList.addAll(getMoviesQueryResults);
+      }
+    } finally {
+      isLoading(false);
+    }
+  }
+}
+https://github.com/Alaa-kh/Movies-App/blob/main/lib/logic/controller/movies_top_controller.dart
+import 'package:get/get.dart';
+
+import '../model/movies_top_model.dart';
+import '../services/movies_top_services.dart';
+
+class MoviesTopRatedController extends GetxController {
+  List<Result> moviesTopRatedList = [];
+  var isLoading = true.obs;
+  @override
+  void onInit() {
+    super.onInit();
+    getMoviesTopRated();
+  }
+
+  void getMoviesTopRated() async {
+    final GetTopRatedModel getMoviesTopRated =
+        await MoviesTopRatedServices.getMoviesTopRated();
+    final List<Result> getMoviesTopRatedResults = getMoviesTopRated.results;
+    try {
+      isLoading(true);
+      if (getMoviesTopRatedResults.isNotEmpty) {
+        moviesTopRatedList.addAll(getMoviesTopRatedResults);
+      }
+    } finally {
+      isLoading(false);
+    }
+  }
+}
+https://github.com/Alaa-kh/Movies-App/blob/main/lib/logic/model/movies_model.dart
+import 'dart:convert';
+
+GetMoviesModel getMoviesModelFromJson(String str) =>
+    GetMoviesModel.fromJson(json.decode(str));
+
+String getMoviesModelToJson(GetMoviesModel data) => json.encode(data.toJson());
+
+class GetMoviesModel {
+  int page;
+  List<Result> results;
+  int totalPages;
+  int totalResults;
+
+  GetMoviesModel({
+    required this.page,
+    required this.results,
+    required this.totalPages,
+    required this.totalResults,
+  });
+
+  factory GetMoviesModel.fromJson(Map<String, dynamic> json) => GetMoviesModel(
+        page: json["page"],
+        results:
+            List<Result>.from(json["results"].map((x) => Result.fromJson(x))),
+        totalPages: json["total_pages"],
+        totalResults: json["total_results"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "page": page,
+        "results": List<dynamic>.from(results.map((x) => x.toJson())),
+        "total_pages": totalPages,
+        "total_results": totalResults,
+      };
+}
+
+class Result {
+  bool adult;
+  String? backdropPath;
+  List<int> genreIds;
+  int id;
+  OriginalLanguage originalLanguage;
+  String originalTitle;
+  String overview;
+  double popularity;
+  String posterPath;
+  DateTime releaseDate;
+  String title;
+  bool video;
+  double voteAverage;
+  int voteCount;
+
+  Result({
+    required this.adult,
+    this.backdropPath,
+    required this.genreIds,
+    required this.id,
+    required this.originalLanguage,
+    required this.originalTitle,
+    required this.overview,
+    required this.popularity,
+    required this.posterPath,
+    required this.releaseDate,
+    required this.title,
+    required this.video,
+    required this.voteAverage,
+    required this.voteCount,
+  });
+
+  factory Result.fromJson(Map<String, dynamic> json) => Result(
+        adult: json["adult"],
+        backdropPath: json["backdrop_path"],
+        genreIds: List<int>.from(json["genre_ids"].map((x) => x)),
+        id: json["id"],
+        originalLanguage:
+            originalLanguageValues.map[json["original_language"]] ?? OriginalLanguage.EN,
+        originalTitle: json["original_title"],
+        overview: json["overview"],
+        popularity: json["popularity"]?.toDouble(),
+        posterPath: json["poster_path"],
+        releaseDate: DateTime.parse(json["release_date"]),
+        title: json["title"],
+        video: json["video"],
+        voteAverage: json["vote_average"]?.toDouble(),
+        voteCount: json["vote_count"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "adult": adult,
+        "backdrop_path": backdropPath,
+        "genre_ids": List<dynamic>.from(genreIds.map((x) => x)),
+        "id": id,
+        "original_language": originalLanguageValues.reverse[originalLanguage],
+        "original_title": originalTitle,
+        "overview": overview,
+        "popularity": popularity,
+        "poster_path": posterPath,
+        "release_date":
+            "${releaseDate.year.toString().padLeft(4, '0')}-${releaseDate.month.toString().padLeft(2, '0')}-${releaseDate.day.toString().padLeft(2, '0')}",
+        "title": title,
+        "video": video,
+        "vote_average": voteAverage,
+        "vote_count": voteCount,
+      };
+}
+
+enum OriginalLanguage { EN, FR, JA, UK }
+
+final originalLanguageValues = EnumValues({
+  "en": OriginalLanguage.EN,
+  "fr": OriginalLanguage.FR,
+  "ja": OriginalLanguage.JA,
+  "uk": OriginalLanguage.UK
+});
+
+class EnumValues<T> {
+  Map<String, T> map;
+  late Map<T, String> reverseMap;
+
+  EnumValues(this.map);
+
+  Map<T, String> get reverse {
+    reverseMap = map.map((k, v) => MapEntry(v, k));
+    return reverseMap;
+  }
+}
+https://github.com/Alaa-kh/Movies-App/blob/main/lib/logic/model/movies_on_air_model.dart
+// To parse this JSON data, do
+//
+//     final getMoviesOnAirModel = getMoviesOnAirModelFromJson(jsonString);
+
+import 'dart:convert';
+
+GetMoviesOnAirModel getMoviesOnAirModelFromJson(String str) =>
+    GetMoviesOnAirModel.fromJson(json.decode(str));
+
+String getMoviesOnAirModelToJson(GetMoviesOnAirModel data) =>
+    json.encode(data.toJson());
+
+class GetMoviesOnAirModel {
+  int page;
+  List<Result> results;
+  int totalPages;
+  int totalResults;
+
+  GetMoviesOnAirModel({
+    required this.page,
+    required this.results,
+    required this.totalPages,
+    required this.totalResults,
+  });
+
+  factory GetMoviesOnAirModel.fromJson(Map<String, dynamic> json) =>
+      GetMoviesOnAirModel(
+        page: json["page"],
+        results:
+            List<Result>.from(json["results"].map((x) => Result.fromJson(x))),
+        totalPages: json["total_pages"],
+        totalResults: json["total_results"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "page": page,
+        "results": List<dynamic>.from(results.map((x) => x.toJson())),
+        "total_pages": totalPages,
+        "total_results": totalResults,
+      };
+}
+
+class Result {
+  String? backdropPath;
+  DateTime firstAirDate;
+  List<int> genreIds;
+  int id;
+  String name;
+  List<String> originCountry;
+  String originalLanguage;
+  String originalName;
+  String overview;
+  double popularity;
+  String posterPath;
+  double voteAverage;
+  int voteCount;
+
+  Result({
+    this.backdropPath,
+    required this.firstAirDate,
+    required this.genreIds,
+    required this.id,
+    required this.name,
+    required this.originCountry,
+    required this.originalLanguage,
+    required this.originalName,
+    required this.overview,
+    required this.popularity,
+    required this.posterPath,
+    required this.voteAverage,
+    required this.voteCount,
+  });
+
+  factory Result.fromJson(Map<String, dynamic> json) => Result(
+        backdropPath: json["backdrop_path"],
+        firstAirDate: DateTime.parse(json["first_air_date"]),
+        genreIds: List<int>.from(json["genre_ids"].map((x) => x)),
+        id: json["id"],
+        name: json["name"],
+        originCountry: List<String>.from(json["origin_country"].map((x) => x)),
+        originalLanguage: json["original_language"],
+        originalName: json["original_name"],
+        overview: json["overview"],
+        popularity: json["popularity"]?.toDouble(),
+        posterPath: json["poster_path"],
+        voteAverage: json["vote_average"]?.toDouble(),
+        voteCount: json["vote_count"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "backdrop_path": backdropPath,
+        "first_air_date":
+            "${firstAirDate.year.toString().padLeft(4, '0')}-${firstAirDate.month.toString().padLeft(2, '0')}-${firstAirDate.day.toString().padLeft(2, '0')}",
+        "genre_ids": List<dynamic>.from(genreIds.map((x) => x)),
+        "id": id,
+        "name": name,
+        "origin_country": List<dynamic>.from(originCountry.map((x) => x)),
+        "original_language": originalLanguage,
+        "original_name": originalName,
+        "overview": overview,
+        "popularity": popularity,
+        "poster_path": posterPath,
+        "vote_average": voteAverage,
+        "vote_count": voteCount,
+      };
+}
+https://github.com/Alaa-kh/Movies-App/blob/main/lib/logic/model/movies_query_model.dart
+import 'dart:convert';
+
+GetMoviesQueryModel getMoviesQueryModelFromJson(String str) =>
+    GetMoviesQueryModel.fromJson(json.decode(str));
+
+String getMoviesQueryModelToJson(GetMoviesQueryModel data) =>
+    json.encode(data.toJson());
+
+class GetMoviesQueryModel {
+  int page;
+  List<Result> results;
+  int totalPages;
+  int totalResults;
+
+  GetMoviesQueryModel({
+    required this.page,
+    required this.results,
+    required this.totalPages,
+    required this.totalResults,
+  });
+
+  factory GetMoviesQueryModel.fromJson(Map<String, dynamic> json) =>
+      GetMoviesQueryModel(
+        page: json["page"],
+        results:
+            List<Result>.from(json["results"].map((x) => Result.fromJson(x))),
+        totalPages: json["total_pages"],
+        totalResults: json["total_results"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "page": page,
+        "results": List<dynamic>.from(results.map((x) => x.toJson())),
+        "total_pages": totalPages,
+        "total_results": totalResults,
+      };
+}
+
+class Result {
+  bool adult;
+  String? backdropPath;
+  List<int> genreIds;
+  int id;
+  String originalLanguage;
+  String originalTitle;
+  String overview;
+  double popularity;
+  String posterPath;
+  DateTime releaseDate;
+  String title;
+  bool video;
+  double voteAverage;
+  int voteCount;
+
+  Result({
+    required this.adult,
+    this.backdropPath,
+    required this.genreIds,
+    required this.id,
+    required this.originalLanguage,
+    required this.originalTitle,
+    required this.overview,
+    required this.popularity,
+    required this.posterPath,
+    required this.releaseDate,
+    required this.title,
+    required this.video,
+    required this.voteAverage,
+    required this.voteCount,
+  });
+
+  factory Result.fromJson(Map<String, dynamic> json) => Result(
+        adult: json["adult"],
+        backdropPath: json["backdrop_path"],
+        genreIds: List<int>.from(json["genre_ids"].map((x) => x)),
+        id: json["id"],
+        originalLanguage: json["original_language"],
+        originalTitle: json["original_title"],
+        overview: json["overview"],
+        popularity: json["popularity"]?.toDouble(),
+        posterPath: json["poster_path"],
+        releaseDate: DateTime.parse(json["release_date"]),
+        title: json["title"],
+        video: json["video"],
+        voteAverage: json["vote_average"]?.toDouble(),
+        voteCount: json["vote_count"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "adult": adult,
+        "backdrop_path": backdropPath,
+        "genre_ids": List<dynamic>.from(genreIds.map((x) => x)),
+        "id": id,
+        "original_language": originalLanguage,
+        "original_title": originalTitle,
+        "overview": overview,
+        "popularity": popularity,
+        "poster_path": posterPath,
+        "release_date":
+            "${releaseDate.year.toString().padLeft(4, '0')}-${releaseDate.month.toString().padLeft(2, '0')}-${releaseDate.day.toString().padLeft(2, '0')}",
+        "title": title,
+        "video": video,
+        "vote_average": voteAverage,
+        "vote_count": voteCount,
+      };
+}
+https://github.com/Alaa-kh/Movies-App/blob/main/lib/logic/model/movies_top_model.dart
+import 'dart:convert';
+
+GetTopRatedModel getTopRatedModelFromJson(String str) =>
+    GetTopRatedModel.fromJson(json.decode(str));
+
+String getTopRatedModelToJson(GetTopRatedModel data) =>
+    json.encode(data.toJson());
+
+class GetTopRatedModel {
+  int page;
+  List<Result> results;
+  int totalPages;
+  int totalResults;
+
+  GetTopRatedModel({
+    required this.page,
+    required this.results,
+    required this.totalPages,
+    required this.totalResults,
+  });
+
+  factory GetTopRatedModel.fromJson(Map<String, dynamic> json) =>
+      GetTopRatedModel(
+        page: json["page"],
+        results:
+            List<Result>.from(json["results"].map((x) => Result.fromJson(x))),
+        totalPages: json["total_pages"],
+        totalResults: json["total_results"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "page": page,
+        "results": List<dynamic>.from(results.map((x) => x.toJson())),
+        "total_pages": totalPages,
+        "total_results": totalResults,
+      };
+}
+
+class Result {
+  bool adult;
+  String backdropPath;
+  List<int> genreIds;
+  int id;
+  String originalLanguage;
+  String originalTitle;
+  String overview;
+  double popularity;
+  String posterPath;
+  DateTime releaseDate;
+  String title;
+  bool video;
+  double voteAverage;
+  int voteCount;
+
+  Result({
+    required this.adult,
+    required this.backdropPath,
+    required this.genreIds,
+    required this.id,
+    required this.originalLanguage,
+    required this.originalTitle,
+    required this.overview,
+    required this.popularity,
+    required this.posterPath,
+    required this.releaseDate,
+    required this.title,
+    required this.video,
+    required this.voteAverage,
+    required this.voteCount,
+  });
+
+  factory Result.fromJson(Map<String, dynamic> json) => Result(
+        adult: json["adult"],
+        backdropPath: json["backdrop_path"],
+        genreIds: List<int>.from(json["genre_ids"].map((x) => x)),
+        id: json["id"],
+        originalLanguage: json["original_language"],
+        originalTitle: json["original_title"],
+        overview: json["overview"],
+        popularity: json["popularity"]?.toDouble(),
+        posterPath: json["poster_path"],
+        releaseDate: DateTime.parse(json["release_date"]),
+        title: json["title"],
+        video: json["video"],
+        voteAverage: json["vote_average"]?.toDouble(),
+        voteCount: json["vote_count"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "adult": adult,
+        "backdrop_path": backdropPath,
+        "genre_ids": List<dynamic>.from(genreIds.map((x) => x)),
+        "id": id,
+        "original_language": originalLanguage,
+        "original_title": originalTitle,
+        "overview": overview,
+        "popularity": popularity,
+        "poster_path": posterPath,
+        "release_date":
+            "${releaseDate.year.toString().padLeft(4, '0')}-${releaseDate.month.toString().padLeft(2, '0')}-${releaseDate.day.toString().padLeft(2, '0')}",
+        "title": title,
+        "video": video,
+        "vote_average": voteAverage,
+        "vote_count": voteCount,
+      };
+}
+https://github.com/Alaa-kh/Movies-App/blob/main/lib/logic/services/movies_on_air_services.dart
+import 'package:http/http.dart' as http;
+import 'package:movies/utils/strings.dart';
+
+// import '../../utils/strings.dart';
+import '../model/movies_on_air_model.dart';
+
+class MoviesOnAirServices {
+  static Future<GetMoviesOnAirModel> getMoviesOnAir() async {
+    var response = await http.get(Uri.parse(
+        '$baseUrl/tv/on_the_air?api_key=61222fdc8669a6536695abd204a053a8&language=en&page=1&sort_by=popularity.desc'));
+
+    if (response.statusCode == 200) {
+      var jsonData = response.body;
+      return getMoviesOnAirModelFromJson(jsonData);
+    } else {
+      return throw Exception('Failed to load product');
+    }
+  }
+}
+https://github.com/Alaa-kh/Movies-App/blob/main/lib/logic/services/movies_query_services.dart
+import 'package:http/http.dart' as http;
+
+import '../../utils/strings.dart';
+import '../model/movies_query_model.dart';
+
+class MoviesQueryServices {
+  static Future<GetMoviesQueryModel> getMoviesQuery() async {
+    var response = await http.get(Uri.parse(
+        '$baseUrl/search/movie?api_key=61222fdc8669a6536695abd204a053a8&language=en&query=hell&page=3'));
+
+    if (response.statusCode == 200) {
+      var jsonData = response.body;
+      return getMoviesQueryModelFromJson(jsonData);
+    } else {
+      return throw Exception('Failed to load product');
+    }
+  }
+}
+https://github.com/Alaa-kh/Movies-App/blob/main/lib/logic/services/movies_services.dart
+import 'package:http/http.dart' as http;
+import 'package:movies/logic/model/movies_model.dart';
+
+import '../../utils/strings.dart';
+
+class FetchData {
+  static Future<GetMoviesModel> getMovies() async {
+    var response = await http.get(Uri.parse(
+        '$baseUrl/discover/movie?api_key=61222fdc8669a6536695abd204a053a8&language=en&page=1&sort_by=popularity.desc'));
+
+    if (response.statusCode == 200) {
+      var jsonData = response.body;
+      return getMoviesModelFromJson(jsonData);
+    } else {
+      return throw Exception('Failed to load product');
+    }
+  }
+}
+https://github.com/Alaa-kh/Movies-App/blob/main/lib/logic/services/movies_top_services.dart
+import 'package:http/http.dart' as http;
+
+import '../../utils/strings.dart';
+import '../model/movies_top_model.dart';
+
+class MoviesTopRatedServices {
+  static Future<GetTopRatedModel> getMoviesTopRated() async {
+    var response = await http.get(Uri.parse(
+        '$baseUrl/movie/top_rated?api_key=10d39203e458fc0a8dec50a358c99540&language=en-US&sort_by=with_genres&with_genres=Action&year=2005&page=2'));
+
+    if (response.statusCode == 200) {
+      var jsonData = response.body;
+      return getTopRatedModelFromJson(jsonData);
+    } else {
+      return throw Exception('Failed to load product');
+    }
+  }
+}
+https://github.com/Alaa-kh/Movies-App/blob/main/lib/router/routers.dart
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:movies/logic/binding/movies_binding.dart';
+import 'package:movies/view/auth/login_screen.dart';
+import 'package:movies/view/screens/main_screen.dart';
+import 'package:movies/view/screens/splash_screen.dart';
+import '../logic/binding/auth_binding.dart';
+import '../view/auth/signup_screen.dart';
+
+class AppRoutes {
+  static const splash = Routes.splashScreen;
+  static const main = Routes.mainScreen;
+  static const logIn = Routes.loginScreen;
+
+  static final routes = [
+    GetPage(
+      name: Routes.authGate,
+      page: () => const AuthGate(),
+    ),
+    GetPage(
+      name: Routes.splashScreen,
+      page: () => SplashScreen(),
+    ),
+    GetPage(
+      name: Routes.mainScreen,
+      page: () => MainScreen(),
+      binding: MoviesBinding(),
+    ),
+    GetPage(
+      name: Routes.signupScreen,
+      page: () => SignUpScreen(),
+      bindings: [AuthBinding(), MoviesBinding()],
+    ),
+    GetPage(
+      name: Routes.loginScreen,
+      page: () => LogInScreen(),
+      bindings: [AuthBinding(), MoviesBinding()],
+    ),
+  ];
+}
+
+class Routes {
+  static const authGate = '/AuthGate';
+  static const splashScreen = '/SplashScreen';
+  static const mainScreen = '/MainScreen';
+  static const signupScreen = '/SignupScreen';
+  static const loginScreen = '/LoginScreen';
+}
+
+class AuthGate extends StatelessWidget {
+  const AuthGate({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (snapshot.hasData) {
+          Future.microtask(() {
+            Get.offAllNamed(Routes.mainScreen);
+          });
+        } else {
+          Future.microtask(() {
+            Get.offAllNamed(Routes.loginScreen);
+          });
+        }
+
+        return const SizedBox();
+      },
+    );
+  }
+}
+https://github.com/Alaa-kh/Movies-App/blob/main/lib/utils/animations_string.dart
+const String urlSplashAnimate = 'assets/animations/welcome.json';
+const String forgotAnimate = 'assets/animations/forget_password.json';
+const String emptyAnimate = 'assets/animations/animation_lkvisr5s.json';
+const String favoriteAnimate = 'assets/animations/animation_lkvss5ip.json';
+const String loadingAnimate = 'assets/animations/animation_lky9ndpp.json';
+https://github.com/Alaa-kh/Movies-App/blob/main/lib/utils/strings.dart
+const String titleApp = 'Movies';
+const String splashTitle = 'MOVIES APP';
+const String searchTxt = 'Search';
+const String popularTxt = 'Popular Movies';
+const String queryMoviesTxt = 'Query Movies';
+const String topRatedTxt = 'Top Rated Movies';
+const String urlImage = 'https://image.tmdb.org/t/p/w500';
+const String description = 'Description';
+const String showLess = ' Show Less';
+const String showMore = 'Show More';
+const String logIn = 'Log In';
+const String enterEmail = 'Enter Your Email';
+const String enterName = 'Enter Your Name';
+const String password = 'Password';
+const String forgotPass = 'Forgot Password?';
+const String or = 'OR';
+const String signUp = 'Sign Up';
+const String createAccount = 'Create Account';
+const String forgot = 'Forgot';
+const String send = 'SEND';
+const String logOut = 'Logout';
+const String various = 'Various';
+
+const String baseUrl = 'https://api.themoviedb.org/3';
+String validationEmail =
+    r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+";
+
+String validationName = r'^[a-z A-Z]+$';
+https://github.com/Alaa-kh/Movies-App/blob/main/lib/utils/theme.dart
+import 'package:flutter/material.dart';
+
+const Color mainClr = Color.fromARGB(255, 0, 0, 0);
+const Color gryClr = Colors.grey;
+const Color amberClr = Colors.amber;
+https://github.com/Alaa-kh/Movies-App/blob/main/lib/firebase_options.dart
+// File generated by FlutterFire CLI.
+// ignore_for_file: lines_longer_than_80_chars, avoid_classes_with_only_static_members
+import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, kIsWeb, TargetPlatform;
+
+/// Default [FirebaseOptions] for use with your Firebase apps.
+///
+/// Example:
+/// ```dart
+/// import 'firebase_options.dart';
+/// // ...
+/// await Firebase.initializeApp(
+///   options: DefaultFirebaseOptions.currentPlatform,
+/// );
+/// ```
+class DefaultFirebaseOptions {
+  static FirebaseOptions get currentPlatform {
+    if (kIsWeb) {
+      return web;
+    }
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return android;
+      case TargetPlatform.iOS:
+        return ios;
+      case TargetPlatform.macOS:
+        return macos;
+      case TargetPlatform.windows:
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for windows - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
+      case TargetPlatform.linux:
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for linux - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
+      default:
+        throw UnsupportedError(
+          'DefaultFirebaseOptions are not supported for this platform.',
+        );
+    }
+  }
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyDRC2tyd8WDGlT1g0mH2HYsDsY1DDNMe4s',
+    appId: '1:902554592767:web:5f36f77f878f1b7b1ab3ca',
+    messagingSenderId: '902554592767',
+    projectId: 'movie-6984b',
+    authDomain: 'movie-6984b.firebaseapp.com',
+    storageBucket: 'movie-6984b.appspot.com',
+    measurementId: 'G-EHMFJBDHDR',
+  );
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyBrgDg62t9swt6gSv_6FmDdP1mB1hGgbt4',
+    appId: '1:902554592767:android:b77594dcc1e9257c1ab3ca',
+    messagingSenderId: '902554592767',
+    projectId: 'movie-6984b',
+    storageBucket: 'movie-6984b.appspot.com',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyDxsxZuYE7PhCWairTQPHw-lFLcaL6wJqE',
+    appId: '1:902554592767:ios:390a435f89fa4f781ab3ca',
+    messagingSenderId: '902554592767',
+    projectId: 'movie-6984b',
+    storageBucket: 'movie-6984b.appspot.com',
+    iosClientId: '902554592767-p6jln02hjdm9aj8ne792frl7dvkm1rbs.apps.googleusercontent.com',
+    iosBundleId: 'com.example.movies',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyDxsxZuYE7PhCWairTQPHw-lFLcaL6wJqE',
+    appId: '1:902554592767:ios:93d520874c6eccf21ab3ca',
+    messagingSenderId: '902554592767',
+    projectId: 'movie-6984b',
+    storageBucket: 'movie-6984b.appspot.com',
+    iosClientId: '902554592767-ovv8fjld1ncgatej35vt4bvufn9tk0qh.apps.googleusercontent.com',
+    iosBundleId: 'com.example.movies.RunnerTests',
+  );
+}
+https://github.com/Alaa-kh/Movies-App/blob/main/lib/view/auth/forgot_pass.dart
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
+import 'package:movies/utils/strings.dart';
+import 'package:movies/utils/theme.dart';
+import 'package:movies/view/widgets/auth/auth_text_form_filed.dart';
+import 'package:movies/view/widgets/text_utils.dart';
+
+import '../../logic/controller/auth_controller.dart';
+import '../../utils/animations_string.dart';
+
+final emailController = TextEditingController();
+final controller = Get.find<AuthController>();
+final fromKey = GlobalKey<FormState>();
+
+class ForgotScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+          child: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              child: Padding(
+                padding: EdgeInsets.only(left: 18, top: 50),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextUtils(
+                      text: forgot,
+                      color: Colors.white,
+                      fontSize: 45,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    TextUtils(
+                      text: password,
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ],
+                ),
+              ),
+              height: 250,
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                  color: mainClr,
+                  borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(00),
+                      bottomRight: Radius.circular(400))),
+            ),
+            Form(
+              key: fromKey,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 18.0, right: 18.0),
+                child: Column(
+                  children: [
+                    Lottie.asset(forgotAnimate),
+                    AuthTextFormField(
+                      hintText: enterEmail,
+                      controller: emailController,
+                      obscureText: false,
+                      validator: (value) {
+                        if (!RegExp(validationEmail).hasMatch(value)) {
+                          return 'Invalid Email';
+                        } else {
+                          return null;
+                        }
+                      },
+                      prefixIcon: const Icon(
+                        Icons.email_outlined,
+                        color: gryClr,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 40,
+                    ),
+                    Container(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                          style: ButtonStyle(
+                              backgroundColor:
+                                  MaterialStateProperty.all(mainClr),
+                              shape: MaterialStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5.0),
+                              ))),
+                          onPressed: () {
+                            if (fromKey.currentState!.validate()) {
+                              controller
+                                  .resetPassword(emailController.text.trim());
+                            }
+                          },
+                          child: const TextUtils(
+                              text: send,
+                              fontSize: 15,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.white)),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
+      )),
+    );
+  }
+}
+https://github.com/Alaa-kh/Movies-App/blob/main/lib/view/auth/login_screen.dart
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:movies/utils/theme.dart';
+import 'package:movies/view/auth/forgot_pass.dart';
+import 'package:movies/view/auth/signup_screen.dart';
+import 'package:movies/view/widgets/auth/auth_text_form_filed.dart';
+import 'package:movies/view/widgets/text_utils.dart';
+
+import '../../logic/controller/auth_controller.dart';
+import '../../utils/strings.dart';
+
+final controller = Get.find<AuthController>();
+final fromKey = GlobalKey<FormState>();
+final emailController = TextEditingController();
+final passwordController = TextEditingController();
+
+class LogInScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+          child: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              child: Padding(
+                padding: EdgeInsets.only(left: 18, top: 50),
+                child: TextUtils(
+                  text: logIn,
+                  color: Colors.white,
+                  fontSize: 45,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              height: 350,
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(00),
+                      bottomRight: Radius.circular(400))),
+            ),
+            Form(
+              key: fromKey,
+              child: Padding(
+                padding: const EdgeInsets.all(18.0),
+                child: Column(
+                  children: [
+                    GetBuilder<AuthController>(
+                      builder: (_) => AuthTextFormField(
+                        hintText: enterEmail,
+                        controller: emailController,
+                        obscureText: false,
+                        validator: (value) {
+                          if (!RegExp(validationEmail).hasMatch(value)) {
+                            return 'Invalid Email';
+                          } else {
+                            return null;
+                          }
+                        },
+                        prefixIcon: const Icon(
+                          Icons.email_outlined,
+                          color: gryClr,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    GetBuilder<AuthController>(
+                        builder: (_) => AuthTextFormField(
+                            hintText: password,
+                            controller: passwordController,
+                            obscureText: controller.isVisibility ? false : true,
+                            validator: (value) {
+                              if (value.toString().length < 6) {
+                                return 'Password should be longer or equal to 6 characters';
+                              } else {
+                                return null;
+                              }
+                            },
+                            prefixIcon: const Icon(
+                              Icons.lock_outline,
+                              color: gryClr,
+                            ),
+                            suffixIcon: IconButton(
+                                onPressed: () {
+                                  controller.visibility();
+                                },
+                                icon: controller.isVisibility
+                                    ? const Icon(
+                                        Icons.visibility,
+                                        color: gryClr,
+                                      )
+                                    : const Icon(
+                                        Icons.visibility_off,
+                                        color: gryClr,
+                                      )))),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: GestureDetector(
+                        onTap: () {
+                          Get.to(ForgotScreen(),
+                              transition: Transition.downToUp,
+                              duration: const Duration(milliseconds: 500));
+                        },
+                        child: const TextUtils(
+                            text: forgotPass,
+                            fontSize: 13,
+                            fontWeight: FontWeight.normal,
+                            color: gryClr),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 72,
+                    ),
+                    Container(
+                      width: double.infinity,
+                      height: 50,
+                      child: GetBuilder<AuthController>(
+                        builder: (_) => ElevatedButton(
+                            style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.all(mainClr),
+                                shape: MaterialStateProperty.all<
+                                        RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5.0),
+                                ))),
+                            onPressed: () {
+                              if (fromKey.currentState!.validate()) {
+                                controller.logInUsingFirebase(
+                                    email: emailController.text.trim(),
+                                    password: passwordController.text);
+                              }
+                            },
+                            child: const TextUtils(
+                                text: logIn,
+                                fontSize: 15,
+                                fontWeight: FontWeight.normal,
+                                color: Colors.white)),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    const Text(
+                      or,
+                      style: TextStyle(height: 2.5),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Container(
+                        width: double.infinity,
+                        height: 50,
+                        child: TextButton(
+                          style: ButtonStyle(
+                              shape: MaterialStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5.0),
+                                      side: const BorderSide(color: gryClr)))),
+                          child: const TextUtils(
+                              text: signUp,
+                              fontSize: 15,
+                              fontWeight: FontWeight.normal,
+                              color: mainClr),
+                          onPressed: () {
+                            Get.offAll(SignUpScreen(),
+                                transition: Transition.zoom,
+                                duration: const Duration(seconds: 1));
+                          },
+                        ))
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
+      )),
+    );
+  }
+}
+https://github.com/Alaa-kh/Movies-App/blob/main/lib/view/auth/signup_screen.dart
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:movies/view/widgets/auth/auth_text_form_filed.dart';
+import 'package:movies/view/widgets/text_utils.dart';
+
+import '../../logic/controller/auth_controller.dart';
+import '../../router/routers.dart';
+import '../../utils/strings.dart';
+import '../../utils/theme.dart';
+
+final controller = Get.find<AuthController>();
+final fromKey = GlobalKey<FormState>();
+final nameController = TextEditingController();
+final emailController = TextEditingController();
+final passwordController = TextEditingController();
+
+class SignUpScreen extends StatelessWidget {
+  final emailController = TextEditingController();
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+          child: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              child: Padding(
+                padding: EdgeInsets.only(left: 18, top: 50),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextUtils(
+                      text: signUp,
+                      color: Colors.white,
+                      fontSize: 45,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    TextUtils(
+                      text: createAccount,
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ],
+                ),
+              ),
+              height: 350,
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(00),
+                      bottomRight: Radius.circular(400))),
+            ),
+            Form(
+              key: fromKey,
+              child: Padding(
+                padding: const EdgeInsets.all(18.0),
+                child: Column(
+                  children: [
+                    GetBuilder<AuthController>(
+                      builder: (_) => AuthTextFormField(
+                        hintText: enterName,
+                        controller: nameController,
+                        obscureText: false,
+                        validator: (value) {
+                          if (value.toString().length <= 2 ||
+                              !RegExp(validationName).hasMatch(value)) {
+                            return 'Enter valid Name';
+                          } else {
+                            return null;
+                          }
+                        },
+                        prefixIcon: const Icon(
+                          Icons.person_2_outlined,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    GetBuilder<AuthController>(
+                        builder: (_) => AuthTextFormField(
+                              hintText: enterEmail,
+                              controller: emailController,
+                              obscureText: false,
+                              validator: (value) {
+                                if (!RegExp(validationEmail).hasMatch(value)) {
+                                  return 'Invalid Email';
+                                } else {
+                                  return null;
+                                }
+                              },
+                              prefixIcon: const Icon(
+                                Icons.email_outlined,
+                                color: Colors.grey,
+                              ),
+                            )),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    GetBuilder<AuthController>(
+                        builder: (_) => AuthTextFormField(
+                              hintText: password,
+                              controller: passwordController,
+                              obscureText:
+                                  controller.isVisibility ? false : true,
+                              validator: (value) {
+                                if (value.toString().length < 6) {
+                                  return 'Password should be longer or equal to 6 characters';
+                                } else {
+                                  return null;
+                                }
+                              },
+                              prefixIcon: const Icon(
+                                Icons.lock_outline,
+                                color: Colors.grey,
+                              ),
+                              suffixIcon: IconButton(
+                                  onPressed: () {
+                                    controller.visibility();
+                                  },
+                                  icon: controller.isVisibility
+                                      ? const Icon(
+                                          Icons.visibility,
+                                          color: gryClr,
+                                        )
+                                      : const Icon(
+                                          Icons.visibility_off,
+                                          color: gryClr,
+                                        )),
+                            )),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    Container(
+                      width: double.infinity,
+                      height: 50,
+                      child: GetBuilder<AuthController>(
+                        builder: (_) => ElevatedButton(
+                            style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.all(mainClr),
+                                shape: MaterialStateProperty.all<
+                                        RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5.0),
+                                ))),
+                            onPressed: () {
+                              if (fromKey.currentState!.validate())
+                                controller.signUpUsingFirebase(
+                                    name: nameController.text.trim(),
+                                    email: emailController.text,
+                                    password: passwordController.text);
+                            },
+                            child: const TextUtils(
+                                text: signUp,
+                                fontSize: 15,
+                                fontWeight: FontWeight.normal,
+                                color: Colors.white)),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    const Text(
+                      or,
+                      style: TextStyle(height: 2.5),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Container(
+                        width: double.infinity,
+                        height: 50,
+                        child: TextButton(
+                          style: ButtonStyle(
+                              shape: MaterialStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5.0),
+                                      side: const BorderSide(color: gryClr)))),
+                          child: const TextUtils(
+                              text: logIn,
+                              fontSize: 15,
+                              fontWeight: FontWeight.normal,
+                              color: mainClr),
+                          onPressed: () {
+                            Get.offNamed(Routes.loginScreen);
+                          },
+                        ))
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
+      )),
+    );
+  }
+}
+
+https://github.com/Alaa-kh/Movies-App/blob/main/lib/notification.dart
+import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:flutter/material.dart';
+
+class NotificationServices {
+  static Future<void> initializenoti() async {
+    AwesomeNotifications().initialize(
+        null,
+        [
+          NotificationChannel(
+              ledColor: Colors.amber,
+              groupAlertBehavior: GroupAlertBehavior.Summary,
+              channelKey: 'basic_channel',
+              channelName: 'True Shop',
+              channelDescription: 'Notification for test',
+              defaultColor: Colors.yellow,
+              importance: NotificationImportance.Max,
+              playSound: true,
+              channelShowBadge: true,
+              criticalAlerts: true)
+        ],
+        channelGroups: [
+          NotificationChannelGroup(
+              channelGroupKey: 'basic_channel_group',
+              channelGroupName: 'Group 1')
+        ],
+        debug: true);
+
+    await AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
+      if (!isAllowed) {
+        AwesomeNotifications().requestPermissionToSendNotifications();
+      }
+    });
+
+    await AwesomeNotifications().setListeners(
+      onActionReceivedMethod: onActionReceivedMethod,
+      onNotificationCreatedMethod: onNotificationCreatedMethod,
+      onNotificationDisplayedMethod: onNotificationDisplayedMethod,
+      onDismissActionReceivedMethod: onDismissActionReceivedMethod,
+    );
+  }
+
+  static Future<void> onNotificationCreatedMethod(
+      ReceivedNotification receivedNotification) async {
+    debugPrint('onNotificationCreatedMethod');
+  }
+
+  static Future<void> onNotificationDisplayedMethod(
+      ReceivedNotification receivedNotification) async {
+    debugPrint('onNotificationDisplayedMethod');
+  }
+
+  static Future<void> onDismissActionReceivedMethod(
+      ReceivedNotification receivedNotification) async {
+    debugPrint('onDismissActionReceivedMethod');
+  }
+
+  static Future<void> onActionReceivedMethod(
+      ReceivedNotification receivedAction) async {
+    debugPrint('onActionReceivedMethod');
+  }
+
+  static Future<void> showNotification({
+    required final String title,
+    required final body,
+    final ActionType actionType = ActionType.Default,
+    final NotificationLayout notificationLayout = NotificationLayout.Default,
+    final bool schedual = false,
+    final int? interval,
+  }) async {
+    assert(!schedual || (schedual && interval != null));
+
+    await AwesomeNotifications().createNotification(
+        content: NotificationContent(
+          id: -1,
+          channelKey: 'basic_channel',
+          title: title,
+          body: ' ${body.toString()}',
+          actionType: actionType,
+          notificationLayout: notificationLayout,
+          color: Colors.red,
+          backgroundColor: Colors.red,
+        ),
+        schedule: schedual
+            ? NotificationInterval(
+                interval: interval != null ? Duration(seconds: interval) : null,
+                timeZone:
+                    await AwesomeNotifications().getLocalTimeZoneIdentifier(),
+                preciseAlarm: true,
+              )
+
+            : null);
+  }
+}
+https://github.com/Alaa-kh/Movies-App/blob/main/lib/router/routers.dart
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:movies/logic/binding/movies_binding.dart';
+import 'package:movies/view/auth/login_screen.dart';
+import 'package:movies/view/screens/main_screen.dart';
+import 'package:movies/view/screens/splash_screen.dart';
+import '../logic/binding/auth_binding.dart';
+import '../view/auth/signup_screen.dart';
+
+class AppRoutes {
+  static const splash = Routes.splashScreen;
+  static const main = Routes.mainScreen;
+  static const logIn = Routes.loginScreen;
+
+  static final routes = [
+    GetPage(
+      name: Routes.authGate,
+      page: () => const AuthGate(),
+    ),
+    GetPage(
+      name: Routes.splashScreen,
+      page: () => SplashScreen(),
+    ),
+    GetPage(
+      name: Routes.mainScreen,
+      page: () => MainScreen(),
+      binding: MoviesBinding(),
+    ),
+    GetPage(
+      name: Routes.signupScreen,
+      page: () => SignUpScreen(),
+      bindings: [AuthBinding(), MoviesBinding()],
+    ),
+    GetPage(
+      name: Routes.loginScreen,
+      page: () => LogInScreen(),
+      bindings: [AuthBinding(), MoviesBinding()],
+    ),
+  ];
+}
+
+class Routes {
+  static const authGate = '/AuthGate';
+  static const splashScreen = '/SplashScreen';
+  static const mainScreen = '/MainScreen';
+  static const signupScreen = '/SignupScreen';
+  static const loginScreen = '/LoginScreen';
+}
+
+class AuthGate extends StatelessWidget {
+  const AuthGate({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (snapshot.hasData) {
+          Future.microtask(() {
+            Get.offAllNamed(Routes.mainScreen);
+          });
+        } else {
+          Future.microtask(() {
+            Get.offAllNamed(Routes.loginScreen);
+          });
+        }
+
+        return const SizedBox();
+      },
+    );
+  }
+}
