@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
+import 'package:movies/utils/animation/motions.dart';
 
 import '../../logic/controller/movies_controller.dart';
 import '../../logic/controller/movies_query_controller.dart';
@@ -41,7 +42,7 @@ class DiscoverMovies extends StatelessWidget {
                           fontSize: 40,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
-                        ),
+                        ).fadeUp()
                       ],
                     ),
                     TextUtils(
@@ -49,7 +50,7 @@ class DiscoverMovies extends StatelessWidget {
                       fontSize: 25,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
-                    ),
+                    ).fadeUp(),
                   ],
                 ),
                 Container(
@@ -62,7 +63,7 @@ class DiscoverMovies extends StatelessWidget {
                     Icons.star,
                     size: 50,
                   ),
-                ),
+                ).fadeUp(),
               ],
             ),
             const SizedBox(height: 25),
@@ -74,7 +75,7 @@ class DiscoverMovies extends StatelessWidget {
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
-                ),
+                ).fadeUp(),
                 const SizedBox(height: 10),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,7 +120,7 @@ class DiscoverMovies extends StatelessWidget {
                                     .toString(),
                               ),
                             ),
-                          ),
+                          ).fadeUp(),
                         );
                       }
                     }),
@@ -129,7 +130,7 @@ class DiscoverMovies extends StatelessWidget {
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
-                    ),
+                    ).fadeUp(),
                     const SizedBox(height: 10),
                     Obx(() {
                       if (moviesTopRatedController.isLoading.value == true) {
@@ -180,7 +181,7 @@ class DiscoverMovies extends StatelessWidget {
                                 ),
                               ),
                             ),
-                          ),
+                          ).fadeUp(),
                         );
                       }
                     }),
@@ -192,7 +193,7 @@ class DiscoverMovies extends StatelessWidget {
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
-                    ),
+                    ).fadeUp(),
                     const SizedBox(height: 10),
                     Obx(() {
                       if (moviesQueryController.isLoading.value == true) {
@@ -242,7 +243,7 @@ class DiscoverMovies extends StatelessWidget {
                                 ),
                               ),
                             ),
-                          ),
+                          ).fadeUp(),
                         );
                       }
                     }),

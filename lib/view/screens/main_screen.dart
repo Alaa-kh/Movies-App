@@ -2,6 +2,7 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
+import 'package:movies/utils/animation/motions.dart';
 
 import 'package:movies/view/widgets/text_utils.dart';
 
@@ -103,7 +104,7 @@ class buildContainer extends StatelessWidget {
                 child: Image.network(
                   image,
                   fit: BoxFit.fill,
-                ),
+                ).fadeUp(),
               ),
             ),
             const SizedBox(
@@ -121,7 +122,7 @@ class buildContainer extends StatelessWidget {
                         color: Colors.white,
                         fontSize: 17,
                         fontWeight: FontWeight.bold),
-                  ),
+                  ).fadeUp(),
                   const SizedBox(
                     height: 7,
                   ),
@@ -129,7 +130,8 @@ class buildContainer extends StatelessWidget {
                       text: voteAverage.toString(),
                       fontSize: 15,
                       fontWeight: FontWeight.normal,
-                      color: gryClr),
+                      color: gryClr)
+                      .fadeUp(),
                   RatingBarIndicator(
                     unratedColor: gryClr,
                     itemSize: 17,
@@ -139,7 +141,7 @@ class buildContainer extends StatelessWidget {
                       Icons.star,
                       color: amberClr,
                     ),
-                  )
+                  ).fadeUp()
                 ],
               ),
             ),
