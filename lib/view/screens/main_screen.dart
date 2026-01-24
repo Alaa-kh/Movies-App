@@ -87,56 +87,63 @@ class buildContainer extends StatelessWidget {
   final Function() onTap;
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(5),
-      child: InkWell(
-        onTap: onTap,
-        child: Container(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: width,
-                height: height,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Image.network(
-                    image,
-                    fit: BoxFit.fill,
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: width,
+              height: height,
+              child: ClipRRect(
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20)),
+                child: Image.network(
+                  image,
+                  fit: BoxFit.fill,
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold),
                   ),
-                ),
+                  const SizedBox(
+                    height: 7,
+                  ),
+                  TextUtils(
+                      text: voteAverage.toString(),
+                      fontSize: 15,
+                      fontWeight: FontWeight.normal,
+                      color: gryClr),
+                  RatingBarIndicator(
+                    unratedColor: gryClr,
+                    itemSize: 17,
+                    itemCount: 5,
+                    rating: rate,
+                    itemBuilder: (context, index) => const Icon(
+                      Icons.star,
+                      color: amberClr,
+                    ),
+                  )
+                ],
               ),
-              const SizedBox(
-                height: 10,
-              ),
-              Text(
-                title,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(
-                height: 7,
-              ),
-              TextUtils(
-                  text: voteAverage.toString(),
-                  fontSize: 15,
-                  fontWeight: FontWeight.normal,
-                  color: gryClr),
-              RatingBarIndicator(
-                unratedColor: gryClr,
-                itemSize: 17,
-                itemCount: 5,
-                rating: rate,
-                itemBuilder: (context, index) => const Icon(
-                  Icons.star,
-                  color: amberClr,
-                ),
-              )
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

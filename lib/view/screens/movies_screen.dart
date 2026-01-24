@@ -14,129 +14,158 @@ final MoviesOnAirController controller = Get.put(MoviesOnAirController());
 class MoviesScreen extends StatelessWidget {
   const MoviesScreen({super.key});
 
+  int _cols(double w) {
+    if (w >= 1200) return 6;
+    if (w >= 900) return 5;
+    if (w >= 700) return 4;
+    if (w >= 520) return 3;
+    return 2;
+  }
+
+  double _mainExtent(double w) {
+    if (w >= 1200) return 330;
+    if (w >= 900) return 320;
+    if (w >= 700) return 310;
+    if (w >= 520) return 300;
+    return 290;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final crossAxisCount = width >= 900 ? 4 : (width >= 600 ? 3 : 2);
+    return LayoutBuilder(
+      builder: (context, c) {
+        final w = c.maxWidth;
+        final crossAxisCount = _cols(w);
+        final gap = w >= 700 ? 14.0 : 12.0;
+        final edge = w >= 700 ? 16.0 : 12.0;
+        final iconBox = w >= 700 ? 54.0 : 48.0;
 
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          GetBuilder<MoviesOnAirController>(
-            builder: (c) => Row(
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(18.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        color: Colors.grey.shade400.withValues(alpha: .2),
-                      ),
-                      child: TextField(
-                        style: const TextStyle(color: Colors.white),
-                        controller: c.searchTextController,
-                        onChanged: (searchName) {
-                          c.addSearchToList(searchName);
-                        },
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          suffixIcon: c.searchTextController.text.isNotEmpty
-                              ? IconButton(
-                                  onPressed: c.clearSearch,
-                                  icon: const Icon(
-                                    Icons.close,
-                                    color: Colors.white,
+        return CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(edge, edge, edge, gap),
+                  child: GetBuilder<MoviesOnAirController>(
+                    builder: (ctr) => Row(
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: iconBox,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                color:
+                                    Colors.grey.shade400.withValues(alpha: .2),
+                              ),
+                              child: TextField(
+                                style: const TextStyle(color: Colors.white),
+                                controller: ctr.searchTextController,
+                                onChanged: ctr.addSearchToList,
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 14,
                                   ),
-                                )
-                              : null,
-                          contentPadding: const EdgeInsets.all(12),
-                          hintText: searchTxt,
-                          hintStyle: const TextStyle(color: gryClr),
+                                  hintText: searchTxt,
+                                  hintStyle: const TextStyle(color: gryClr),
+                                  suffixIcon:
+                                      ctr.searchTextController.text.isNotEmpty
+                                          ? IconButton(
+                                              onPressed: ctr.clearSearch,
+                                              icon: const Icon(Icons.close,
+                                                  color: Colors.white),
+                                            )
+                                          : null,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+                        SizedBox(width: gap),
+                        SizedBox(
+                          width: iconBox,
+                          height: iconBox,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.grey.shade400.withValues(alpha: .2),
+                            ),
+                            child: IconButton(
+                              onPressed: () {},
+                              icon: const Icon(Icons.star,
+                                  size: 28, color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(right: 18),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.grey.shade400.withValues(alpha: .2),
-                    ),
-                    width: 50,
-                    height: 50,
-                    child: IconButton(
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.star,
-                        size: 30,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Obx(() {
-            if (controller.isLoading.value == true) {
-              return const Padding(
-                padding: EdgeInsets.only(top: 40),
-                child: Center(child: CircularProgressIndicator()),
-              );
-            }
-
-            if (controller.searchList.isEmpty &&
-                controller.searchTextController.text.isNotEmpty) {
-              return Center(child: Lottie.asset(emptyAnimate));
-            }
-
-            final list = controller.searchList.isEmpty
-                ? controller.moviesOnAirList
-                : controller.searchList;
-
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: list.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  childAspectRatio: 0.62,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                ),
-                itemBuilder: (context, index) {
-                  final item = list[index];
-                  return BuildContainerOnAir(
-                    width: double.infinity,
-                    height: 190,
-                    onTap: () => Get.to(
-                      () => MoviesOnAirDetails(
-                        getMovies: item,
-                        movieId: item.id,
-                      ),
-                      transition: Transition.size,
-                      duration: const Duration(milliseconds: 500),
-                    ),
-                    image: urlImage + item.posterPath,
-                    title: item.name,
-                    rate: item.voteAverage / 2,
-                    voteAverage: item.voteAverage.toString(),
-                    movieId: item.id,
-                  ).fadeUp();
-                },
               ),
-            );
-          }),
-          SizedBox(height: 20,)
-        ],
-      ),
+            ),
+            Obx(() {
+              if (controller.isLoading.value) {
+                return const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 40),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                );
+              }
+
+              if (controller.searchList.isEmpty &&
+                  controller.searchTextController.text.isNotEmpty) {
+                return SliverToBoxAdapter(
+                  child: Center(child: Lottie.asset(emptyAnimate)),
+                );
+              }
+
+              final list = controller.searchList.isEmpty
+                  ? controller.moviesOnAirList
+                  : controller.searchList;
+
+              return SliverPadding(
+                padding: EdgeInsets.symmetric(horizontal: edge),
+                sliver: SliverGrid(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final item = list[index];
+                      return BuildContainerOnAir(
+                        onTap: () => Get.to(
+                          () => MoviesOnAirDetails(
+                            getMovies: item,
+                            movieId: item.id,
+                          ),
+                          transition: Transition.size,
+                          duration: const Duration(milliseconds: 500),
+                        ),
+                        image: urlImage + item.posterPath,
+                        title: item.name,
+                        rate: item.voteAverage / 2,
+                        voteAverage: item.voteAverage.toString(),
+                        movieId: item.id,
+                      ).fadeUp();
+                    },
+                    childCount: list.length,
+                  ),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    mainAxisExtent: _mainExtent(w),
+                    crossAxisSpacing: gap,
+                    mainAxisSpacing: gap,
+                  ),
+                ),
+              );
+            }),
+            SliverToBoxAdapter(child: SizedBox(height: edge)),
+          ],
+        );
+      },
     );
   }
 }
