@@ -59,7 +59,7 @@ class ForgotScreen extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 18.0, right: 18.0),
                 child: Column(
                   children: [
-                    Lottie.asset(forgotAnimate),
+                    Lottie.asset(forgotAnimate,repeat: false),
                     AuthTextFormField(
                       hintText: enterEmail,
                       controller: emailController,

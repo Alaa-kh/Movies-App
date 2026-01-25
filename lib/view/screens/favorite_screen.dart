@@ -24,6 +24,7 @@ class FavorieScreen extends StatelessWidget {
             child: Lottie.asset(
               favoriteAnimate,
               width: 200,
+              repeat: false
             ),
           );
         }
