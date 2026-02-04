@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:movies/utils/strings.dart';
 import 'package:movies/utils/theme.dart';
 import 'package:movies/view/auth/forgot_pass.dart';
-import 'package:movies/view/auth/signup_screen.dart';
 import 'package:movies/view/widgets/auth/auth_text_form_filed.dart';
 import 'package:movies/view/widgets/text_utils.dart';
 
 import '../../logic/controller/auth_controller.dart';
-import '../../utils/strings.dart';
+import '../../router/routers.dart';
 
 class LogInScreen extends StatefulWidget {
   const LogInScreen({super.key});
@@ -17,16 +17,16 @@ class LogInScreen extends StatefulWidget {
 }
 
 class _LogInScreenState extends State<LogInScreen> {
-  final AuthController controller = Get.find<AuthController>();
+  final AuthController _auth = Get.find<AuthController>();
 
-  final formKey = GlobalKey<FormState>();
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   @override
   void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
@@ -41,16 +41,15 @@ class _LogInScreenState extends State<LogInScreen> {
               height: 350,
               width: double.infinity,
               decoration: const BoxDecoration(
-                color: Colors.black,
+                color: mainClr,
                 borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(0),
                   bottomRight: Radius.circular(400),
                 ),
               ),
-              child: const Padding(
-                padding: EdgeInsets.only(left: 18, top: 50),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 18, top: 50),
                 child: TextUtils(
-                  text: logIn,
+                  text: 'logIn'.tr,
                   color: Colors.white,
                   fontSize: 45,
                   fontWeight: FontWeight.bold,
@@ -58,22 +57,22 @@ class _LogInScreenState extends State<LogInScreen> {
               ),
             ),
             Form(
-              key: formKey,
+              key: _formKey,
               child: Padding(
-                padding: const EdgeInsets.all(18.0),
+                padding: const EdgeInsets.all(18),
                 child: Column(
                   children: [
                     AuthTextFormField(
-                      hintText: enterEmail,
-                      controller: emailController,
+                      hintText: 'enterEmail'.tr,
+                      controller: _emailController,
                       obscureText: false,
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
                       validator: (value) {
-                        final v = value ?? '';
-                        if (v.isEmpty) return 'Email is required';
+                        final v = (value ?? '').trim();
+                        if (v.isEmpty) return 'Email_required'.tr;
                         if (!RegExp(validationEmail).hasMatch(v)) {
-                          return 'Invalid Email';
+                          return 'invalid_email'.tr;
                         }
                         return null;
                       },
@@ -83,14 +82,14 @@ class _LogInScreenState extends State<LogInScreen> {
                     const SizedBox(height: 20),
                     GetBuilder<AuthController>(
                       builder: (c) => AuthTextFormField(
-                        hintText: password,
-                        controller: passwordController,
+                        hintText: 'password'.tr,
+                        controller: _passwordController,
                         obscureText: !c.isVisibility,
                         textInputAction: TextInputAction.done,
                         validator: (value) {
                           final v = value ?? '';
                           if (v.length < 6) {
-                            return 'Password should be longer or equal to 6 characters';
+                            return 'password_min_6'.tr;
                           }
                           return null;
                         },
@@ -111,15 +110,13 @@ class _LogInScreenState extends State<LogInScreen> {
                     Align(
                       alignment: Alignment.centerRight,
                       child: GestureDetector(
-                        onTap: () {
-                          Get.to(
-                            ForgotScreen(),
-                            transition: Transition.downToUp,
-                            duration: const Duration(milliseconds: 500),
-                          );
-                        },
-                        child: const TextUtils(
-                          text: forgotPass,
+                        onTap: () => Get.to(
+                          () => const ForgotScreen(),
+                          transition: Transition.downToUp,
+                          duration: const Duration(milliseconds: 500),
+                        ),
+                        child: TextUtils(
+                          text: 'forgotPass'.tr,
                           fontSize: 13,
                           fontWeight: FontWeight.normal,
                           color: gryClr,
@@ -131,25 +128,23 @@ class _LogInScreenState extends State<LogInScreen> {
                       width: double.infinity,
                       height: 50,
                       child: ElevatedButton(
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(mainClr),
-                          shape: MaterialStateProperty.all<
-                              RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5.0),
-                            ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: mainClr,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
                           ),
+                          elevation: 0,
                         ),
                         onPressed: () {
-                          if (formKey.currentState!.validate()) {
-                            controller.logInUsingFirebase(
-                              email: emailController.text.trim(),
-                              password: passwordController.text,
+                          if (_formKey.currentState!.validate()) {
+                            _auth.logInUsingFirebase(
+                              email: _emailController.text.trim(),
+                              password: _passwordController.text,
                             );
                           }
                         },
-                        child: const TextUtils(
-                          text: logIn,
+                        child: TextUtils(
+                          text: 'logIn'.tr,
                           fontSize: 15,
                           fontWeight: FontWeight.normal,
                           color: Colors.white,
@@ -157,30 +152,21 @@ class _LogInScreenState extends State<LogInScreen> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    const Text(or, style: TextStyle(height: 2.5)),
+                    Text('or'.tr, style: const TextStyle(height: 2.5)),
                     const SizedBox(height: 10),
                     SizedBox(
                       width: double.infinity,
                       height: 50,
                       child: TextButton(
-                        style: ButtonStyle(
-                          shape: MaterialStateProperty.all<
-                              RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5.0),
-                              side: const BorderSide(color: gryClr),
-                            ),
+                        style: TextButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                            side: const BorderSide(color: gryClr),
                           ),
                         ),
-                        onPressed: () {
-                          Get.offAll(
-                            SignUpScreen(),
-                            transition: Transition.zoom,
-                            duration: const Duration(milliseconds: 700),
-                          );
-                        },
-                        child: const TextUtils(
-                          text: signUp,
+                        onPressed: () => Get.offAllNamed(Routes.signupScreen),
+                        child: TextUtils(
+                          text: 'signUp'.tr,
                           fontSize: 15,
                           fontWeight: FontWeight.normal,
                           color: mainClr,

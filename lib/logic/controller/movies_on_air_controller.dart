@@ -1,53 +1,78 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:movies/logic/controller/locale_controller.dart';
 import 'package:movies/logic/model/movies_on_air_model.dart';
 import 'package:movies/logic/services/movies_on_air_services.dart';
 
 class MoviesOnAirController extends GetxController {
-  var moviesOnAirList = <Result>[].obs;
-  var searchList = <Result>[].obs;
-  var favoriteList = <Result>[].obs;
-  var strorage = GetStorage();
-  TextEditingController searchTextController = TextEditingController();
-  var isLoading = true.obs;
+  final moviesOnAirList = <Result>[].obs;
+  final searchList = <Result>[].obs;
+  final favoriteList = <Result>[].obs;
+
+  final strorage = GetStorage();
+  final searchTextController = TextEditingController();
+  final isLoading = true.obs;
+
+  late final Worker _localeWorker;
 
   @override
   void onInit() {
     super.onInit();
 
-    List? storedShoppings = strorage.read<List>('isFavoritesList');
-    if (storedShoppings != null) {
-      favoriteList =
-          storedShoppings.map((value) => Result.fromJson(value)).toList().obs;
+    final stored = strorage.read<List>('isFavoritesList');
+    if (stored != null) {
+      final items = stored.whereType<Map>().map((e) {
+        return Result.fromJson(Map<String, dynamic>.from(e));
+      }).toList();
+      favoriteList.assignAll(items);
     }
 
-    getOnAirMovies();
+    final localeCtrl = Get.find<LocaleController>();
+    _localeWorker = ever(localeCtrl.localeRx, (_) => reload());
+    reload();
   }
 
-  void getOnAirMovies() async {
-    final GetMoviesOnAirModel movies =
-        await MoviesOnAirServices.getMoviesOnAir();
-    final List<Result> getMoviesResults = movies.results;
+  @override
+  void onClose() {
+    _localeWorker.dispose();
+    searchTextController.dispose();
+    super.onClose();
+  }
+
+  Future<void> reload() async {
+    final localeCtrl = Get.find<LocaleController>();
 
     try {
       isLoading(true);
-      if (getMoviesResults.isNotEmpty) {
-        moviesOnAirList.addAll(getMoviesResults);
-      }
+      moviesOnAirList.clear();
+
+      final data = await MoviesOnAirServices.getMoviesOnAir(
+        language: localeCtrl.tmdbLanguage,
+        page: 1,
+      );
+
+      final model = getMoviesOnAirModelFromJson(jsonEncode(data));
+      moviesOnAirList.addAll(model.results);
+
+      addSearchToList(searchTextController.text);
     } finally {
       isLoading(false);
     }
   }
 
-// Search Bar Logic
-
   void addSearchToList(String searchName) {
-    searchName = searchName.toLowerCase();
+    final q = searchName.toLowerCase().trim();
+    if (q.isEmpty) {
+      searchList.clear();
+      update();
+      return;
+    }
 
     searchList.value = moviesOnAirList.where((value) {
-      var searchTitle = value.name.toLowerCase();
-      return searchTitle.contains(searchName);
+      final name = value.name.toLowerCase();
+      return name.contains(q);
     }).toList();
 
     update();
@@ -58,18 +83,25 @@ class MoviesOnAirController extends GetxController {
     addSearchToList('');
   }
 
+  Future<void> _persistFavorites() async {
+    final list = favoriteList.map((e) => e.toJson()).toList();
+    await strorage.write('isFavoritesList', list);
+  }
+
   void favoriteMovie(int movieId) async {
-    var existingIndex =
-        favoriteList.indexWhere((element) => element.id == movieId);
+    final existingIndex = favoriteList.indexWhere((e) => e.id == movieId);
+
     if (existingIndex >= 0) {
       favoriteList.removeAt(existingIndex);
-      await strorage.remove('isFavoritesList');
-    } else {
-      favoriteList
-          .add(moviesOnAirList.firstWhere((element) => element.id == movieId));
-
-      await strorage.write('isFavoritesList', favoriteList);
+      await _persistFavorites();
+      return;
     }
+
+    final item = moviesOnAirList.firstWhereOrNull((e) => e.id == movieId);
+    if (item == null) return;
+
+    favoriteList.add(item);
+    await _persistFavorites();
   }
 
   bool isFavorite(int movieId) {

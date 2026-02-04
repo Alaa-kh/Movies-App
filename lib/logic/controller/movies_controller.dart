@@ -1,47 +1,75 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:movies/logic/controller/locale_controller.dart';
 import 'package:movies/logic/model/movies_model.dart';
-
+import 'package:movies/logic/services/movies_services.dart';
+import '../../view/screens/discover_screen.dart';
 import '../../view/screens/favorite_screen.dart';
 import '../../view/screens/logout_screen.dart';
-import '../../view/screens/discover_screen.dart';
 import '../../view/screens/movies_screen.dart';
-import '../services/movies_services.dart';
 
 class MoviesController extends GetxController {
-  List<Result> movieList = [];
-  var isLoading = true.obs;
+  final isLoading = true.obs;
+  final movieList = <Result>[].obs;
+
+  final searchList = <Result>[].obs;
+  final searchTextController = TextEditingController();
+
+  RxInt currentIndex = 0.obs;
+  late final Worker _localeWorker;
+
+  final tabs = [
+    const DiscoverMovies(),
+    const MoviesScreen(),
+    const FavorieScreen(),
+    const LogOutScreen(),
+  ].obs;
+
   @override
   void onInit() {
     super.onInit();
-    getMovies();
+    final localeCtrl = Get.find<LocaleController>();
+    _localeWorker = ever(localeCtrl.localeRx, (_) => reload());
+    reload();
   }
 
-  void getMovies() async {
-    final GetMoviesModel movies = await FetchData.getMovies();
-    final List<Result> getMoviesResults = movies.results;
+  @override
+  void onClose() {
+    _localeWorker.dispose();
+    searchTextController.dispose();
+    super.onClose();
+  }
 
+  Future<void> reload() async {
+    final localeCtrl = Get.find<LocaleController>();
     try {
       isLoading(true);
-      if (getMoviesResults.isNotEmpty) {
-        movieList.addAll(getMoviesResults);
+      movieList.clear();
+
+      final data = await FetchData.getMovies(language: localeCtrl.tmdbLanguage);
+      final model = getMoviesModelFromJson(jsonEncode(data));
+
+      if (model.results.isNotEmpty) {
+        movieList.addAll(model.results);
       }
+      addSearchToList(searchTextController.text);
     } finally {
       isLoading(false);
     }
   }
 
-  var searchList = <Result>[].obs;
-  TextEditingController searchTextController = TextEditingController();
-
-// Search Bar Logic
-
   void addSearchToList(String searchName) {
-    searchName = searchName.toLowerCase();
+    final q = searchName.toLowerCase().trim();
+    if (q.isEmpty) {
+      searchList.clear();
+      update();
+      return;
+    }
 
-    searchList.value = movieList.where((value) {
-      var searchTitle = value.title.toLowerCase();
-      return searchTitle.contains(searchName);
+    searchList.value = movieList.where((m) {
+      final title = m.title.toLowerCase();
+      return title.contains(q);
     }).toList();
 
     update();
@@ -51,13 +79,4 @@ class MoviesController extends GetxController {
     searchTextController.clear();
     addSearchToList('');
   }
-
-  RxInt currentIndex = 0.obs;
-
-  final tabs = [
-    DiscoverMovies(),
-    MoviesScreen(),
-    FavorieScreen(),
-    LogOutScreen(),
-  ].obs;
 }

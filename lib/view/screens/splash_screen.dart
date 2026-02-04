@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
-import 'package:movies/utils/theme.dart';
-import 'package:movies/view/widgets/text_utils.dart';
 
 import '../../router/routers.dart';
 import '../../utils/animations_string.dart';
-import '../../utils/strings.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -18,29 +15,36 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
-    Future.delayed(
-        const Duration(seconds: 6), () => Get.offNamed(Routes.loginScreen));
     super.initState();
+    Future.delayed(
+        const Duration(seconds: 3), () => Get.offAllNamed(Routes.authGate));
   }
 
+  @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Container(
-          color: Colors.white,
+    final scheme = Theme.of(context).colorScheme;
+
+    return Scaffold(
+      backgroundColor: scheme.surface,
+      body: SafeArea(
+        child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Lottie.asset(urlSplashAnimate),
-              const SizedBox(
-                height: 20,
+              const SizedBox(height: 16),
+              Text(
+                'appName'.tr,
+                style: TextStyle(
+                  color: scheme.onSurface,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
-              const TextUtils(
-                  text: splashTitle,
-                  fontSize: 25,
-                  fontWeight: FontWeight.bold,
-                  color: mainClr)
             ],
-          )),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -6,13 +6,13 @@ class TextUtils extends StatelessWidget {
     required this.text,
     required this.fontSize,
     required this.fontWeight,
-    required this.color,
+    this.color,
     this.overflow,
   }) : super(key: key);
   final String text;
   final double fontSize;
   final FontWeight fontWeight;
-  final Color color;
+  final Color? color;
   final TextOverflow? overflow;
   @override
   Widget build(BuildContext context) {

@@ -1,26 +1,41 @@
-import 'package:get/get.dart';
+import 'dart:convert';
 
-import '../model/movies_top_model.dart';
-import '../services/movies_top_services.dart';
+import 'package:get/get.dart';
+import 'package:movies/logic/controller/locale_controller.dart';
+import 'package:movies/logic/model/movies_top_model.dart' as top;
+import 'package:movies/logic/services/movies_top_services.dart';
 
 class MoviesTopRatedController extends GetxController {
-  List<Result> moviesTopRatedList = [];
-  var isLoading = true.obs;
+  final isLoading = true.obs;
+  final moviesTopRatedList = <top.Result>[].obs;
+
+  late final Worker _localeWorker;
+
   @override
   void onInit() {
     super.onInit();
-    getMoviesTopRated();
+    final localeCtrl = Get.find<LocaleController>();
+    _localeWorker = ever(localeCtrl.localeRx, (_) => reload());
+    reload();
   }
 
-  void getMoviesTopRated() async {
-    final GetTopRatedModel getMoviesTopRated =
-        await MoviesTopRatedServices.getMoviesTopRated();
-    final List<Result> getMoviesTopRatedResults = getMoviesTopRated.results;
+  @override
+  void onClose() {
+    _localeWorker.dispose();
+    super.onClose();
+  }
+
+  Future<void> reload() async {
+    final localeCtrl = Get.find<LocaleController>();
     try {
       isLoading(true);
-      if (getMoviesTopRatedResults.isNotEmpty) {
-        moviesTopRatedList.addAll(getMoviesTopRatedResults);
-      }
+      moviesTopRatedList.clear();
+
+      final data = await MoviesTopRatedServices.getMoviesTopRated(
+        language: localeCtrl.tmdbLanguage,
+      );
+      final model = top.getTopRatedModelFromJson(jsonEncode(data));
+      moviesTopRatedList.addAll(model.results);
     } finally {
       isLoading(false);
     }

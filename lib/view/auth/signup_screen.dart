@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:movies/utils/strings.dart';
+import 'package:movies/utils/theme.dart';
 import 'package:movies/view/widgets/auth/auth_text_form_filed.dart';
 import 'package:movies/view/widgets/text_utils.dart';
 
 import '../../logic/controller/auth_controller.dart';
 import '../../router/routers.dart';
-import '../../utils/strings.dart';
-import '../../utils/theme.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -16,18 +16,18 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  final AuthController controller = Get.find<AuthController>();
+  final AuthController _auth = Get.find<AuthController>();
 
-  final formKey = GlobalKey<FormState>();
-  final nameController = TextEditingController();
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   @override
   void dispose() {
-    nameController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
@@ -42,9 +42,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
               height: 350,
               width: double.infinity,
               decoration: const BoxDecoration(
-                color: Colors.black,
+                color: mainClr,
                 borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(0),
                   bottomRight: Radius.circular(400),
                 ),
               ),
@@ -52,16 +51,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 padding: const EdgeInsets.only(left: 18, top: 50),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     TextUtils(
-                      text: signUp,
+                      text: 'signUp'.tr,
                       color: Colors.white,
                       fontSize: 45,
                       fontWeight: FontWeight.bold,
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     TextUtils(
-                      text: createAccount,
+                      text: 'createAccount'.tr,
                       color: Colors.white,
                       fontSize: 20,
                       fontWeight: FontWeight.normal,
@@ -71,124 +70,110 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
             ),
             Form(
-              key: formKey,
+              key: _formKey,
               child: Padding(
-                padding: const EdgeInsets.all(18.0),
+                padding: const EdgeInsets.all(18),
                 child: Column(
                   children: [
                     AuthTextFormField(
-                      hintText: enterName,
-                      controller: nameController,
+                      hintText: 'enterName'.tr,
+                      controller: _nameController,
                       obscureText: false,
+                      textInputAction: TextInputAction.next,
                       validator: (value) {
-                        final v = value ?? '';
-                        if (v.length <= 2 ||
-                            !RegExp(validationName).hasMatch(v)) {
-                          return 'Enter valid Name';
+                        final v = (value ?? '').trim();
+                        if (v.length <= 2 || !RegExp(validationName).hasMatch(v)) {
+                          return 'enter_valid_name'.tr;
                         }
                         return null;
                       },
-                      prefixIcon: const Icon(Icons.person_2_outlined,
-                          color: Colors.grey),
+                      prefixIcon: const Icon(Icons.person_2_outlined, color: gryClr),
                     ),
-      
                     const SizedBox(height: 20),
-      
                     AuthTextFormField(
-                      hintText: enterEmail,
-                      controller: emailController,
+                      hintText: 'enterEmail'.tr,
+                      controller: _emailController,
                       obscureText: false,
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
                       validator: (value) {
-                        final v = value ?? '';
+                        final v = (value ?? '').trim();
                         if (!RegExp(validationEmail).hasMatch(v)) {
-                          return 'Invalid Email';
+                          return 'invalid_email'.tr;
                         }
                         return null;
                       },
-                      prefixIcon: const Icon(Icons.email_outlined,
-                          color: Colors.grey),
+                      prefixIcon: const Icon(Icons.email_outlined, color: gryClr),
                     ),
-      
                     const SizedBox(height: 20),
                     GetBuilder<AuthController>(
                       builder: (c) => AuthTextFormField(
-                        hintText: password,
-                        controller: passwordController,
+                        hintText: 'password'.tr,
+                        controller: _passwordController,
                         obscureText: !c.isVisibility,
+                        textInputAction: TextInputAction.done,
                         validator: (value) {
                           final v = value ?? '';
                           if (v.length < 6) {
-                            return 'Password should be longer or equal to 6 characters';
+                            return 'password_min_6'.tr;
                           }
                           return null;
                         },
-                        prefixIcon: const Icon(Icons.lock_outline,
-                            color: Colors.grey),
+                        prefixIcon: const Icon(Icons.lock_outline, color: gryClr),
                         suffixIcon: IconButton(
                           onPressed: c.visibility,
                           icon: Icon(
-                            c.isVisibility
-                                ? Icons.visibility
-                                : Icons.visibility_off,
+                            c.isVisibility ? Icons.visibility : Icons.visibility_off,
                             color: gryClr,
                           ),
                         ),
                       ),
                     ),
-      
                     const SizedBox(height: 30),
-      
                     SizedBox(
                       width: double.infinity,
                       height: 50,
                       child: ElevatedButton(
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(mainClr),
-                          shape: MaterialStateProperty.all<
-                              RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5.0),
-                            ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: mainClr,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
                           ),
+                          elevation: 0,
                         ),
                         onPressed: () {
-                          if (formKey.currentState!.validate()) {
-                            controller.signUpUsingFirebase(
-                              name: nameController.text.trim(),
-                              email: emailController.text.trim(),
-                              password: passwordController.text,
+                          if (_formKey.currentState!.validate()) {
+                            _auth.signUpUsingFirebase(
+                              name: _nameController.text.trim(),
+                              email: _emailController.text.trim(),
+                              password: _passwordController.text,
                             );
                           }
                         },
-                        child: const TextUtils(
-                          text: signUp,
+                        child: TextUtils(
+                          text: 'signUp'.tr,
                           fontSize: 15,
                           fontWeight: FontWeight.normal,
                           color: Colors.white,
                         ),
                       ),
                     ),
-      
                     const SizedBox(height: 10),
-                    const Text(or, style: TextStyle(height: 2.5)),
+                    Text('or'.tr, style: const TextStyle(height: 2.5)),
                     const SizedBox(height: 10),
-      
                     SizedBox(
                       width: double.infinity,
                       height: 50,
                       child: TextButton(
-                        style: ButtonStyle(
-                          shape: MaterialStateProperty.all<
-                              RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5.0),
-                              side: const BorderSide(color: gryClr),
-                            ),
+                        style: TextButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                            side: const BorderSide(color: gryClr),
                           ),
                         ),
                         onPressed: () => Get.offNamed(Routes.loginScreen),
-                        child: const TextUtils(
-                          text: logIn,
+                        child: TextUtils(
+                          text: 'logIn'.tr,
                           fontSize: 15,
                           fontWeight: FontWeight.normal,
                           color: mainClr,

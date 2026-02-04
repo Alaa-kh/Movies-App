@@ -6,10 +6,7 @@ import 'package:movies/view/screens/widgets/build_container_on_air.dart';
 import 'package:movies/view/screens/widgets/movies_on_air_details.dart';
 import '../../logic/controller/movies_on_air_controller.dart';
 import '../../utils/animations_string.dart';
-import '../../utils/strings.dart';
-import '../../utils/theme.dart';
-
-final MoviesOnAirController controller = Get.put(MoviesOnAirController());
+import '../../utils/strings.dart' hide emptyAnimate;
 
 class MoviesScreen extends StatelessWidget {
   const MoviesScreen({super.key});
@@ -32,6 +29,9 @@ class MoviesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.find<MoviesOnAirController>();
+    final scheme = Theme.of(context).colorScheme;
+
     return LayoutBuilder(
       builder: (context, c) {
         final w = c.maxWidth;
@@ -53,52 +53,20 @@ class MoviesScreen extends StatelessWidget {
                         Expanded(
                           child: SizedBox(
                             height: iconBox,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                color:
-                                    Colors.grey.shade400.withValues(alpha: .2),
+                            child: TextField(
+                              controller: ctr.searchTextController,
+                              onChanged: ctr.addSearchToList,
+                              decoration: InputDecoration(
+                                hintText: 'search'.tr,
+                                suffixIcon:
+                                    ctr.searchTextController.text.isNotEmpty
+                                        ? IconButton(
+                                            onPressed: ctr.clearSearch,
+                                            icon: Icon(Icons.close,
+                                                color: scheme.onSurface),
+                                          )
+                                        : null,
                               ),
-                              child: TextField(
-                                style: const TextStyle(color: Colors.white),
-                                controller: ctr.searchTextController,
-                                onChanged: ctr.addSearchToList,
-                                decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  enabledBorder: InputBorder.none,
-                                  focusedBorder: InputBorder.none,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 14,
-                                  ),
-                                  hintText: searchTxt,
-                                  hintStyle: const TextStyle(color: gryClr),
-                                  suffixIcon:
-                                      ctr.searchTextController.text.isNotEmpty
-                                          ? IconButton(
-                                              onPressed: ctr.clearSearch,
-                                              icon: const Icon(Icons.close,
-                                                  color: Colors.white),
-                                            )
-                                          : null,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: gap),
-                        SizedBox(
-                          width: iconBox,
-                          height: iconBox,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.grey.shade400.withValues(alpha: .2),
-                            ),
-                            child: IconButton(
-                              onPressed: () {},
-                              icon: const Icon(Icons.star,
-                                  size: 28, color: Colors.white),
                             ),
                           ),
                         ),
@@ -144,7 +112,7 @@ class MoviesScreen extends StatelessWidget {
                           transition: Transition.size,
                           duration: const Duration(milliseconds: 500),
                         ),
-                        image: urlImage + item.posterPath,
+                        image: '$urlImageW500${item.posterPath}',
                         title: item.name,
                         rate: item.voteAverage / 2,
                         voteAverage: item.voteAverage.toString(),

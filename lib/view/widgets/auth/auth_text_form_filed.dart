@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../utils/theme.dart';
 
-class AuthTextFormField extends StatelessWidget {
+class AuthTextFormField extends StatefulWidget {
   const AuthTextFormField({
     super.key,
     required this.hintText,
@@ -12,6 +12,7 @@ class AuthTextFormField extends StatelessWidget {
     this.suffixIcon,
     this.keyboardType,
     this.textInputAction,
+    this.onSubmitted,
   });
 
   final String hintText;
@@ -22,69 +23,146 @@ class AuthTextFormField extends StatelessWidget {
   final Widget? suffixIcon;
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
+  final ValueChanged<String>? onSubmitted;
+
+  @override
+  State<AuthTextFormField> createState() => _AuthTextFormFieldState();
+}
+
+class _AuthTextFormFieldState extends State<AuthTextFormField> {
+  late final FocusNode _focusNode;
+  TextDirection? _textDirection;
+  TextDirection? _fallbackDirection;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+    widget.controller.addListener(_onTextChanged);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _fallbackDirection ??= Directionality.of(context);
+    _textDirection ??=
+        _detectDirection(widget.controller.text, fallback: _fallbackDirection!);
+  }
+
+  void _onTextChanged() {
+    final fallback = _fallbackDirection;
+    if (fallback == null) return;
+
+    final next = _detectDirection(widget.controller.text, fallback: fallback);
+    if (next != _textDirection) {
+      setState(() => _textDirection = next);
+    }
+  }
+
+  TextDirection _detectDirection(String text,
+      {required TextDirection fallback}) {
+    final t = text.trimLeft();
+    if (t.isEmpty) return fallback;
+
+    final first = t.runes.first;
+    return _isArabicRune(first) ? TextDirection.rtl : TextDirection.ltr;
+  }
+
+  bool _isArabicRune(int rune) {
+    return (rune >= 0x0600 && rune <= 0x06FF) ||
+        (rune >= 0x0750 && rune <= 0x077F) ||
+        (rune >= 0x08A0 && rune <= 0x08FF) ||
+        (rune >= 0xFB50 && rune <= 0xFDFF) ||
+        (rune >= 0xFE70 && rune <= 0xFEFF);
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onTextChanged);
+    _focusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final errorColor = Theme.of(context).colorScheme.error;
+    final scheme = Theme.of(context).colorScheme;
 
-    return FormField<String>(
-      validator: validator,
-      initialValue: controller.text,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
-      builder: (state) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: gryClr.withValues(alpha: 0.3),
-                    spreadRadius: 1,
-                    blurRadius: 4,
-                    offset: const Offset(0, 4),
-                  )
-                ],
-                borderRadius: BorderRadius.circular(13),
-                color: Colors.white,
-                border: Border.all(
-                  color: state.hasError ? errorColor : Colors.grey.shade400,
-                ),
-              ),
-              child: TextField(
-                controller: controller,
-                obscureText: obscureText,
-                keyboardType: keyboardType,
-                textInputAction: textInputAction,
-                onChanged: (v) {
-                  state.didChange(v);
-                  if (state.hasError) state.validate();
-                },
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  prefixIcon: prefixIcon,
-                  suffixIcon: suffixIcon,
-                  hintText: hintText,
-                  hintStyle: const TextStyle(color: gryClr, fontSize: 13),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                ),
-              ),
+    final borderRadius = BorderRadius.circular(16);
+
+    final enabledBorder = OutlineInputBorder(
+      borderRadius: borderRadius,
+      borderSide: BorderSide(
+        color: scheme.outlineVariant.withOpacity(.7),
+        width: 1,
+      ),
+    );
+
+    final focusedBorder = OutlineInputBorder(
+      borderRadius: borderRadius,
+      borderSide: BorderSide(
+        color: scheme.primary,
+        width: 1.4,
+      ),
+    );
+
+    final errorBorder = OutlineInputBorder(
+      borderRadius: borderRadius,
+      borderSide: BorderSide(
+        color: scheme.error,
+        width: 1.2,
+      ),
+    );
+
+    final direction = _textDirection ?? Directionality.of(context);
+
+    return Directionality(
+      textDirection: direction,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: borderRadius,
+          boxShadow: [
+            BoxShadow(
+              color: gryClr.withOpacity(.16),
+              blurRadius: 14,
+              offset: const Offset(0, 10),
             ),
-
-            if (state.hasError)
-              Padding(
-                padding: const EdgeInsets.only(top: 6, left: 12, right: 12),
-                child: Text(
-                  state.errorText ?? '',
-                  style: TextStyle(
-                    color: errorColor,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
           ],
-        );
-      },
+        ),
+        child: TextFormField(
+          controller: widget.controller,
+          focusNode: _focusNode,
+          obscureText: widget.obscureText,
+          keyboardType: widget.keyboardType,
+          textInputAction: widget.textInputAction,
+          validator: widget.validator,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          onFieldSubmitted: widget.onSubmitted,
+          style: TextStyle(
+            color: scheme.onSurface,
+            fontSize: 14.5,
+            fontWeight: FontWeight.w600,
+          ),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: scheme.surface,
+            prefixIcon: widget.prefixIcon,
+            suffixIcon: widget.suffixIcon,
+            hintText: widget.hintText,
+            hintStyle: TextStyle(
+              color: scheme.onSurfaceVariant.withOpacity(.7),
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            border: enabledBorder,
+            enabledBorder: enabledBorder,
+            focusedBorder: focusedBorder,
+            errorBorder: errorBorder,
+            focusedErrorBorder: errorBorder,
+          ),
+        ),
+      ),
     );
   }
 }

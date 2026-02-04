@@ -5,15 +5,13 @@ import 'package:movies/router/routers.dart';
 import 'package:movies/utils/theme.dart';
 import 'package:movies/view/widgets/text_utils.dart';
 
-import '../../utils/strings.dart';
-
 class LogOutScreen extends StatelessWidget {
   const LogOutScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18.0),
+      padding: const EdgeInsets.symmetric(horizontal: 18),
       child: Center(
         child: GestureDetector(
           onTap: () {
@@ -26,8 +24,8 @@ class LogOutScreen extends StatelessWidget {
                   duration: const Duration(milliseconds: 260),
                   curve: Curves.easeOutBack,
                   builder: (context, v, child) {
-                    final double scale = v < 0 ? 0 : v;
-                    final double opacity = v.clamp(0.0, 1.0);
+                    final scale = v < 0 ? 0.0 : v;
+                    final opacity = v.clamp(0.0, 1.0);
                     return Transform.scale(
                       scale: scale,
                       child: Opacity(opacity: opacity, child: child),
@@ -55,8 +53,8 @@ class LogOutScreen extends StatelessWidget {
                           height: 64,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: mainClr.withValues(alpha:  .12),
-                            border: Border.all(color: mainClr.withValues(alpha:.25)),
+                            color: Colors.white.withValues(alpha: .10),
+                            border: Border.all(color: Colors.white.withValues(alpha: .16)),
                           ),
                           child: const Icon(
                             Icons.logout_rounded,
@@ -65,19 +63,19 @@ class LogOutScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 14),
-                        const Text(
-                          'Logout',
-                          style: TextStyle(
+                        Text(
+                          'logout'.tr,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 20,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
                         const SizedBox(height: 6),
-                        const Text(
-                          'Are you sure you want to logout?',
+                        Text(
+                          'logoutConfirm'.tr,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: gryClr,
                             fontSize: 14,
                             height: 1.4,
@@ -88,20 +86,17 @@ class LogOutScreen extends StatelessWidget {
                           children: [
                             Expanded(
                               child: OutlinedButton(
-                                onPressed: () => Get.back(),
+                                onPressed: Get.back,
                                 style: OutlinedButton.styleFrom(
-                                  side: BorderSide(
-                                    color: Colors.white.withValues(alpha: .22),
-                                  ),
+                                  side: BorderSide(color: Colors.white.withValues(alpha: .22)),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(14),
                                   ),
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 14),
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
                                 ),
-                                child: const Text(
-                                  'Cancel',
-                                  style: TextStyle(
+                                child: Text(
+                                  'cancel'.tr,
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w700,
                                   ),
@@ -120,13 +115,12 @@ class LogOutScreen extends StatelessWidget {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(14),
                                   ),
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 14),
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
                                   elevation: 0,
                                 ),
-                                child: const Text(
-                                  'Logout',
-                                  style: TextStyle(
+                                child: Text(
+                                  'logout'.tr,
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w800,
                                   ),
@@ -144,66 +138,50 @@ class LogOutScreen extends StatelessWidget {
               transitionCurve: Curves.easeOut,
             );
           },
-          child: TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: 1),
-            duration: const Duration(milliseconds: 420),
-            curve: Curves.easeOutBack,
-            builder: (context, v, child) {
-              final double scale = v < 0 ? 0 : v;
-              final double opacity = v.clamp(0.0, 1.0);
-              return Transform.scale(
-                scale: scale,
-                child: Opacity(opacity: opacity, child: child),
-              );
-            },
-            child: Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(18),
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.white.withValues(alpha:  .14),
-                    Colors.white.withValues(alpha:  .06),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+          child: Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              gradient: LinearGradient(
+                colors: [
+                  Colors.white.withValues(alpha: .14),
+                  Colors.white.withValues(alpha: .06),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              border: Border.all(color: Colors.white.withValues(alpha: .16)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: .22),
+                  blurRadius: 18,
+                  offset: const Offset(0, 10),
                 ),
-                border: Border.all(color: Colors.white.withValues(alpha: .16)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: .22),
-                    blurRadius: 18,
-                    offset: const Offset(0, 10),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: .12),
+                    border: Border.all(color: Colors.white.withValues(alpha: .12)),
                   ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: .12),
-                      border: Border.all(color: Colors.white.withValues(alpha: .12)),
-                    ),
-                    child: const Icon(Icons.logout, color: Colors.white),
+                  child: const Icon(Icons.logout, color: Colors.white),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextUtils(
+                    text: 'logout'.tr,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextUtils(
-                      text: logOut,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  Icon(
-                    Icons.chevron_right,
-                    color: Colors.white.withValues(alpha: .7),
-                  ),
-                ],
-              ),
+                ),
+                Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: .7)),
+              ],
             ),
           ),
         ),
