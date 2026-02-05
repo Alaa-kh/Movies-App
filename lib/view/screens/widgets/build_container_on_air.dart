@@ -45,7 +45,7 @@ class BuildContainerOnAir extends StatelessWidget {
               child: Image.network(
                 image,
                 width: double.infinity,
-                fit: BoxFit.cover,
+                fit: BoxFit.fill,
               ),
             ),
             Padding(

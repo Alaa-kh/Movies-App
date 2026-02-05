@@ -240,7 +240,7 @@ class _MediaCard extends StatelessWidget {
                     : Image.network(
                         imageUrl!,
                         width: double.infinity,
-                        fit: BoxFit.cover,
+                        fit: BoxFit.fill,
                         errorBuilder: (_, __, ___) => const _ImagePlaceholder(),
                       ),
               ),

@@ -33,7 +33,7 @@ Widget buildFavItem({
               ),
               child: AspectRatio(
                 aspectRatio: 1,
-                child: Image.network(image, fit: BoxFit.cover),
+                child: Image.network(image, fit: BoxFit.fill),
               ),
             ),
           ),
