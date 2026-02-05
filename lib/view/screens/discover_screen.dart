@@ -7,10 +7,18 @@ import 'package:movies/logic/controller/movies_query_controller.dart';
 import 'package:movies/logic/controller/movies_top_controller.dart';
 import 'package:movies/utils/animation/motions.dart';
 import 'package:movies/utils/animations_string.dart';
-import 'package:movies/utils/strings.dart' hide loadingAnimate;
 import 'package:movies/utils/theme.dart';
 import 'package:movies/view/screens/movie_details.dart';
 import 'package:movies/view/widgets/text_utils.dart';
+
+const tmdbImageBaseUrl = 'https://image.tmdb.org/t/p/';
+
+String? buildTmdbImageUrl(String? path, {String size = 'w500'}) {
+  final p = path?.trim();
+  if (p == null || p.isEmpty) return null;
+  final normalized = p.startsWith('/') ? p : '/$p';
+  return '$tmdbImageBaseUrl$size$normalized';
+}
 
 class DiscoverMovies extends StatelessWidget {
   const DiscoverMovies({super.key});
@@ -38,14 +46,14 @@ class DiscoverMovies extends StatelessWidget {
                   children: [
                     Text(
                       'various'.tr,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 37,
                         fontWeight: FontWeight.bold,
                       ),
                     ).fadeUp(),
                     Text(
                       'titleApp'.tr,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 23,
                         fontWeight: FontWeight.bold,
                       ),
@@ -84,13 +92,16 @@ class DiscoverMovies extends StatelessWidget {
                   separatorBuilder: (_, __) => const SizedBox(width: 12),
                   itemBuilder: (context, index) {
                     final item = moviesCtrl.movieList[index];
-                    final img = (item.backdropPath?.isNotEmpty == true)
-                        ? item.backdropPath!
-                        : item.posterPath;
+
+                    final imgPath = (item.backdropPath?.isNotEmpty == true)
+                        ? item.backdropPath
+                        : (item.posterPath.isNotEmpty == true
+                            ? item.posterPath
+                            : null);
 
                     return _MediaCard(
                       width: popularCardW,
-                      imageUrl: '$urlImage$img',
+                      imageUrl: buildTmdbImageUrl(imgPath),
                       title: item.title,
                       voteAverage: item.voteAverage.toStringAsFixed(1),
                       rating: item.voteAverage / 2,
@@ -126,9 +137,10 @@ class DiscoverMovies extends StatelessWidget {
                   separatorBuilder: (_, __) => const SizedBox(width: 12),
                   itemBuilder: (context, index) {
                     final item = topCtrl.moviesTopRatedList[index];
+
                     return _MediaCard(
                       width: 210,
-                      imageUrl: '$urlImage${item.posterPath}',
+                      imageUrl: buildTmdbImageUrl(item.posterPath),
                       title: item.title,
                       voteAverage: item.voteAverage.toStringAsFixed(1),
                       rating: item.voteAverage / 2,
@@ -164,9 +176,10 @@ class DiscoverMovies extends StatelessWidget {
                   separatorBuilder: (_, __) => const SizedBox(width: 12),
                   itemBuilder: (context, index) {
                     final item = queryCtrl.moviesQueryList[index];
+
                     return _MediaCard(
                       width: 210,
-                      imageUrl: '$urlImage${item.posterPath}',
+                      imageUrl: buildTmdbImageUrl(item.posterPath),
                       title: item.title,
                       voteAverage: item.voteAverage.toStringAsFixed(1),
                       rating: item.voteAverage / 2,
@@ -199,7 +212,7 @@ class _MediaCard extends StatelessWidget {
   });
 
   final double width;
-  final String imageUrl;
+  final String? imageUrl;
   final String title;
   final String voteAverage;
   final double rating;
@@ -222,11 +235,14 @@ class _MediaCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: Image.network(
-                  imageUrl,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
+                child: imageUrl == null
+                    ? const _ImagePlaceholder()
+                    : Image.network(
+                        imageUrl!,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const _ImagePlaceholder(),
+                      ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(10, 10, 10, 6),
@@ -269,6 +285,24 @@ class _MediaCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ImagePlaceholder extends StatelessWidget {
+  const _ImagePlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      color: Colors.grey.shade400.withValues(alpha: .12),
+      alignment: Alignment.center,
+      child: const Icon(
+        Icons.image_not_supported_outlined,
+        size: 40,
+        color: gryClr,
       ),
     );
   }

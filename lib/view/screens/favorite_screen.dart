@@ -6,7 +6,6 @@ import 'package:movies/utils/strings.dart';
 import 'package:movies/view/screens/widgets/favorite_item.dart';
 import 'package:movies/view/screens/widgets/movies_on_air_details.dart';
 import '../../logic/controller/movies_on_air_controller.dart';
-import '../../utils/animations_string.dart' hide favoriteAnimate;
 
 class FavorieScreen extends StatelessWidget {
   const FavorieScreen({super.key});

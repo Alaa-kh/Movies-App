@@ -24,7 +24,7 @@ dependencies:
   flutter_dotenv: ^6.0.0
   youtube_player_iframe: ^5.2.2
   webview_flutter: ^4.8.0
-
+  cached_network_image: ^3.3.1
   # State Management & Storage
   get: ^4.6.7
   get_storage: ^2.1.1
@@ -57,6 +57,7 @@ dependencies:
   rate: ^0.0.1
   flutter_launcher_icons: ^0.14.4
   flutter_animate: ^4.5.2
+  sqflite_common_ffi: ^2.4.0+2
 
 dev_dependencies:
   flutter_test:

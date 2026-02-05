@@ -4,11 +4,18 @@ import 'package:get/get.dart';
 import 'package:movies/logic/controller/movies_on_air_controller.dart';
 import 'package:movies/logic/model/movies_on_air_model.dart';
 import 'package:movies/logic/services/trailer_service.dart';
-import 'package:movies/utils/strings.dart';
-import 'package:movies/utils/theme.dart';
 import 'package:movies/view/widgets/comments_section.dart';
 import 'package:movies/view/widgets/trailer_section.dart';
 import 'package:readmore/readmore.dart';
+
+const tmdbImageBaseUrl = 'https://image.tmdb.org/t/p/';
+
+String? buildTmdbImageUrl(String? path, {String size = 'w780'}) {
+  final p = path?.trim();
+  if (p == null || p.isEmpty) return null;
+  final normalized = p.startsWith('/') ? p : '/$p';
+  return '$tmdbImageBaseUrl$size$normalized';
+}
 
 class MoviesOnAirDetails extends StatelessWidget {
   const MoviesOnAirDetails({
@@ -25,13 +32,20 @@ class MoviesOnAirDetails extends StatelessWidget {
     final controller = Get.find<MoviesOnAirController>();
     final scheme = Theme.of(context).colorScheme;
 
-    final posterUrl = '$urlImageW780${getMovies.posterPath}';
+    final posterUrl = buildTmdbImageUrl(getMovies.posterPath, size: 'w780');
 
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.network(posterUrl, fit: BoxFit.cover),
+          if (posterUrl != null)
+            Image.network(
+              posterUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => const _BackdropPlaceholder(),
+            )
+          else
+            const _BackdropPlaceholder(),
           DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -90,7 +104,8 @@ class MoviesOnAirDetails extends StatelessWidget {
                                   itemSize: 20,
                                   itemCount: 5,
                                   rating: getMovies.voteAverage / 2,
-                                  itemBuilder: (_, __) => const Icon(Icons.star, color: amberClr),
+                                  itemBuilder: (_, __) =>
+                                      Icon(Icons.star, color: scheme.tertiary),
                                 ),
                                 const SizedBox(width: 10),
                                 Text(
@@ -158,6 +173,23 @@ class MoviesOnAirDetails extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _BackdropPlaceholder extends StatelessWidget {
+  const _BackdropPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.black,
+      alignment: Alignment.center,
+      child: const Icon(
+        Icons.image_not_supported_outlined,
+        color: Colors.white70,
+        size: 64,
       ),
     );
   }

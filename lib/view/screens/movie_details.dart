@@ -6,6 +6,15 @@ import 'package:movies/view/widgets/comments_section.dart';
 import 'package:movies/view/widgets/trailer_section.dart';
 import 'package:readmore/readmore.dart';
 
+const tmdbImageBaseUrl = 'https://image.tmdb.org/t/p/';
+
+String? buildTmdbImageUrl(String? path, {String size = 'w780'}) {
+  final p = path?.trim();
+  if (p == null || p.isEmpty) return null;
+  final normalized = p.startsWith('/') ? p : '/$p';
+  return '$tmdbImageBaseUrl$size$normalized';
+}
+
 class MovieDetails extends StatelessWidget {
   const MovieDetails({
     super.key,
@@ -20,16 +29,24 @@ class MovieDetails extends StatelessWidget {
 
     final id = getMovies.id as int;
     final title = (getMovies.title as String?) ?? '';
-    final poster = (getMovies.posterPath as String?) ?? '';
+    final posterPath = getMovies.posterPath as String?;
     final overview = (getMovies.overview as String?) ?? '';
     final vote = (getMovies.voteAverage as num?)?.toDouble() ?? 0;
-    final posterUrl = 'https://image.tmdb.org/t/p/w780$poster';
+
+    final posterUrl = buildTmdbImageUrl(posterPath, size: 'w780');
 
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.network(posterUrl, fit: BoxFit.cover),
+          if (posterUrl != null)
+            Image.network(
+              posterUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => const _BackdropPlaceholder(),
+            )
+          else
+            const _BackdropPlaceholder(),
           DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -76,7 +93,8 @@ class MovieDetails extends StatelessWidget {
                                   itemSize: 20,
                                   itemCount: 5,
                                   rating: vote / 2,
-                                  itemBuilder: (_, __) => Icon(Icons.star, color: scheme.tertiary),
+                                  itemBuilder: (_, __) =>
+                                      Icon(Icons.star, color: scheme.tertiary),
                                 ),
                                 const SizedBox(width: 10),
                                 Text(
@@ -144,6 +162,23 @@ class MovieDetails extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _BackdropPlaceholder extends StatelessWidget {
+  const _BackdropPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.black,
+      alignment: Alignment.center,
+      child: const Icon(
+        Icons.image_not_supported_outlined,
+        color: Colors.white70,
+        size: 64,
       ),
     );
   }
