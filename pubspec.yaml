@@ -24,6 +24,7 @@ dependencies:
   flutter_dotenv: ^6.0.0
   youtube_player_iframe: ^5.2.2
   webview_flutter: ^4.8.0
+
   # State Management & Storage
   get: ^4.6.7
   get_storage: ^2.1.1
@@ -45,6 +46,7 @@ dependencies:
   # Notifications
   awesome_notifications: ^0.10.1
   path_provider: ^2.1.5
+
   # WebView
   flutter_inappwebview: ^6.1.0
 
@@ -59,8 +61,6 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
- 
-
 
 flutter_launcher_icons:
   android: true
@@ -74,3 +74,8 @@ flutter:
   - assets/images/
   - assets/animations/
   - .env
+
+  fonts:
+  - family: Cairo
+    fonts:
+    - asset: assets/font/Cairo-Regular.ttf

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static ThemeData light() {
+  static ThemeData light({required bool isArabic}) {
     final scheme = ColorScheme.fromSeed(seedColor: const Color(0xFF4F46E5));
-    return ThemeData(
+
+    final base = ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
       scaffoldBackgroundColor: scheme.surface,
@@ -17,14 +18,30 @@ class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       ),
     );
+
+    final textTheme = base.textTheme.apply(
+      fontFamily: isArabic ? 'Cairo' : null,
+      fontFamilyFallback: const ['Cairo'],
+    );
+
+    final primaryTextTheme = base.primaryTextTheme.apply(
+      fontFamily: isArabic ? 'Cairo' : null,
+      fontFamilyFallback: const ['Cairo'],
+    );
+
+    return base.copyWith(
+      textTheme: textTheme,
+      primaryTextTheme: primaryTextTheme,
+    );
   }
 
-  static ThemeData dark() {
+  static ThemeData dark({required bool isArabic}) {
     final scheme = ColorScheme.fromSeed(
       seedColor: const Color(0xFF4F46E5),
       brightness: Brightness.dark,
     );
-    return ThemeData(
+
+    final base = ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
       scaffoldBackgroundColor: scheme.surface,
@@ -37,6 +54,21 @@ class AppTheme {
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       ),
+    );
+
+    final textTheme = base.textTheme.apply(
+      fontFamily: isArabic ? 'Cairo' : null,
+      fontFamilyFallback: const ['Cairo'],
+    );
+
+    final primaryTextTheme = base.primaryTextTheme.apply(
+      fontFamily: isArabic ? 'Cairo' : null,
+      fontFamilyFallback: const ['Cairo'],
+    );
+
+    return base.copyWith(
+      textTheme: textTheme,
+      primaryTextTheme: primaryTextTheme,
     );
   }
 }

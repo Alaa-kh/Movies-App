@@ -39,14 +39,14 @@ class DiscoverMovies extends StatelessWidget {
                     Text(
                       'various'.tr,
                       style: TextStyle(
-                        fontSize: 40,
+                        fontSize: 37,
                         fontWeight: FontWeight.bold,
                       ),
                     ).fadeUp(),
                     Text(
                       'titleApp'.tr,
                       style: TextStyle(
-                        fontSize: 25,
+                        fontSize: 23,
                         fontWeight: FontWeight.bold,
                       ),
                     ).fadeUp(),
@@ -65,7 +65,7 @@ class DiscoverMovies extends StatelessWidget {
             const SizedBox(height: 25),
             TextUtils(
               text: 'popularMovies'.tr,
-              fontSize: 20,
+              fontSize: 17,
               fontWeight: FontWeight.bold,
             ).fadeUp(),
             const SizedBox(height: 10),
@@ -107,7 +107,7 @@ class DiscoverMovies extends StatelessWidget {
             const SizedBox(height: 40),
             TextUtils(
               text: 'topRatedMovies'.tr,
-              fontSize: 20,
+              fontSize: 17,
               fontWeight: FontWeight.bold,
             ).fadeUp(),
             const SizedBox(height: 10),
@@ -145,7 +145,7 @@ class DiscoverMovies extends StatelessWidget {
             const SizedBox(height: 40),
             TextUtils(
               text: 'queryMovies'.tr,
-              fontSize: 20,
+              fontSize: 17,
               fontWeight: FontWeight.bold,
             ).fadeUp(),
             const SizedBox(height: 10),

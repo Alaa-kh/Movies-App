@@ -34,12 +34,14 @@ class MoviesApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final localeCtrl = Get.find<LocaleController>();
     final themeCtrl = Get.find<ThemeController>();
+return Obx(() {
+      final locale = localeCtrl.localeRx.value;
+      final isArabic = locale.languageCode == 'ar';
 
-    return Obx(() {
       return GetMaterialApp(
         debugShowCheckedModeBanner: false,
         translations: AppTranslations(),
-        locale: localeCtrl.localeRx.value,
+        locale: locale,
         fallbackLocale: const Locale('en', 'US'),
         supportedLocales: const [
           Locale('en', 'US'),
@@ -50,12 +52,14 @@ class MoviesApp extends StatelessWidget {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        theme: AppTheme.light(),
-        darkTheme: AppTheme.dark(),
+        theme: AppTheme.light(isArabic: isArabic),
+        darkTheme: AppTheme.dark(isArabic: isArabic),
         themeMode: themeCtrl.modeRx.value,
         initialRoute: Routes.splashScreen,
         getPages: AppRoutes.routes,
       );
     });
+
+
   }
 }
