@@ -72,7 +72,7 @@ class AppTranslations extends Translations {
           'enterEmail': 'أدخل بريدك الإلكتروني',
           'enterName': 'أدخل اسمك',
           'password': 'كلمة المرور',
-          'forgot': 'استعادة',
+          'forgot': ' استعادة',
           'forgotPass': 'هل نسيت كلمة المرور؟',
           'or': 'أو',
           'logout': 'تسجيل الخروج',

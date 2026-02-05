@@ -34,7 +34,7 @@ class MoviesApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final localeCtrl = Get.find<LocaleController>();
     final themeCtrl = Get.find<ThemeController>();
-return Obx(() {
+    return Obx(() {
       final locale = localeCtrl.localeRx.value;
       final isArabic = locale.languageCode == 'ar';
 
@@ -59,7 +59,5 @@ return Obx(() {
         getPages: AppRoutes.routes,
       );
     });
-
-
   }
 }

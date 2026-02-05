@@ -8,8 +8,35 @@ import '../../logic/controller/movies_on_air_controller.dart';
 import '../../utils/animations_string.dart';
 import '../../utils/strings.dart' hide emptyAnimate;
 
-class MoviesScreen extends StatelessWidget {
+class MoviesScreen extends StatefulWidget {
   const MoviesScreen({super.key});
+
+  @override
+  State<MoviesScreen> createState() => _MoviesScreenState();
+}
+
+class _MoviesScreenState extends State<MoviesScreen> {
+  late final MoviesOnAirController controller;
+  late final TextEditingController _searchCtr;
+
+@override
+  void initState() {
+    super.initState();
+
+    controller = Get.isRegistered<MoviesOnAirController>()
+        ? Get.find<MoviesOnAirController>()
+        : Get.put(MoviesOnAirController(), permanent: true);
+
+    _searchCtr = TextEditingController(text: controller.query.value);
+    _searchCtr.addListener(() => controller.setQuery(_searchCtr.text));
+  }
+
+
+  @override
+  void dispose() {
+    _searchCtr.dispose();
+    super.dispose();
+  }
 
   int _cols(double w) {
     if (w >= 1200) return 6;
@@ -29,7 +56,6 @@ class MoviesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<MoviesOnAirController>();
     final scheme = Theme.of(context).colorScheme;
 
     return LayoutBuilder(
@@ -47,31 +73,28 @@ class MoviesScreen extends StatelessWidget {
                 bottom: false,
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(edge, edge, edge, gap),
-                  child: GetBuilder<MoviesOnAirController>(
-                    builder: (ctr) => Row(
-                      children: [
-                        Expanded(
-                          child: SizedBox(
-                            height: iconBox,
-                            child: TextField(
-                              controller: ctr.searchTextController,
-                              onChanged: ctr.addSearchToList,
-                              decoration: InputDecoration(
-                                hintText: 'search'.tr,
-                                suffixIcon:
-                                    ctr.searchTextController.text.isNotEmpty
-                                        ? IconButton(
-                                            onPressed: ctr.clearSearch,
-                                            icon: Icon(Icons.close,
-                                                color: scheme.onSurface),
-                                          )
-                                        : null,
-                              ),
-                            ),
-                          ),
+                  child: SizedBox(
+                    height: iconBox,
+                    child: Obx(() {
+                      final hasText = controller.query.value.trim().isNotEmpty;
+
+                      return TextField(
+                        controller: _searchCtr,
+                        decoration: InputDecoration(
+                          hintText: 'search'.tr,
+                          suffixIcon: hasText
+                              ? IconButton(
+                                  onPressed: () {
+                                    _searchCtr.clear();
+                                    controller.clearSearch();
+                                  },
+                                  icon: Icon(Icons.close,
+                                      color: scheme.onSurface),
+                                )
+                              : null,
                         ),
-                      ],
-                    ),
+                      );
+                    }),
                   ),
                 ),
               ),
@@ -87,7 +110,7 @@ class MoviesScreen extends StatelessWidget {
               }
 
               if (controller.searchList.isEmpty &&
-                  controller.searchTextController.text.isNotEmpty) {
+                  controller.query.value.trim().isNotEmpty) {
                 return SliverToBoxAdapter(
                   child: Center(child: Lottie.asset(emptyAnimate)),
                 );

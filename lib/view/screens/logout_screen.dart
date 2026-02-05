@@ -10,6 +10,38 @@ class LogOutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    final cardGradient = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: isDark
+          ? [
+              Colors.white.withValues(alpha: .14),
+              Colors.white.withValues(alpha: .06),
+            ]
+          : [
+              scheme.primary.withValues(alpha: .10),
+              scheme.surface,
+            ],
+    );
+
+    final cardBorderColor = isDark
+        ? Colors.white.withValues(alpha: .16)
+        : scheme.outlineVariant.withValues(alpha: .80);
+
+    final cardShadowColor = Colors.black.withValues(alpha: isDark ? .22 : .10);
+
+    final cardTextColor = isDark ? Colors.white : scheme.onSurface;
+    final cardIconBg = isDark
+        ? Colors.white.withValues(alpha: .12)
+        : scheme.primaryContainer.withValues(alpha: .80);
+    final cardIconColor = isDark ? Colors.white : scheme.onPrimaryContainer;
+    final chevronColor =
+        isDark ? Colors.white.withValues(alpha: .70) : scheme.onSurfaceVariant;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 18),
       child: Center(
@@ -34,16 +66,16 @@ class LogOutScreen extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF2A2A2A).withValues(alpha: .95),
+                      color: isDark
+                          ? const Color(0xFF2A2A2A).withValues(alpha: .95)
+                          : scheme.surface.withValues(alpha: .98),
                       borderRadius: BorderRadius.circular(22),
-                      border: Border.all(color: Colors.white.withValues(alpha: .10)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: .22),
-                          blurRadius: 22,
-                          offset: const Offset(0, 14),
-                        ),
-                      ],
+                      border: Border.all(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: .10)
+                            : scheme.outlineVariant.withValues(alpha: .60),
+                      ),
+                   
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -53,20 +85,30 @@ class LogOutScreen extends StatelessWidget {
                           height: 64,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.white.withValues(alpha: .10),
-                            border: Border.all(color: Colors.white.withValues(alpha: .16)),
+                            color: isDark
+                                ? Colors.white.withValues(alpha: .10)
+                                : scheme.primaryContainer
+                                    .withValues(alpha: .85),
+                            border: Border.all(
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: .16)
+                                  : scheme.outlineVariant
+                                      .withValues(alpha: .60),
+                            ),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.logout_rounded,
-                            color: Colors.white,
+                            color: isDark
+                                ? Colors.white
+                                : scheme.onPrimaryContainer,
                             size: 28,
                           ),
                         ),
                         const SizedBox(height: 14),
                         Text(
                           'logout'.tr,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: isDark ? Colors.white : scheme.onSurface,
                             fontSize: 20,
                             fontWeight: FontWeight.w800,
                           ),
@@ -75,8 +117,8 @@ class LogOutScreen extends StatelessWidget {
                         Text(
                           'logoutConfirm'.tr,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: gryClr,
+                          style: TextStyle(
+                            color: isDark ? gryClr : scheme.onSurfaceVariant,
                             fontSize: 14,
                             height: 1.4,
                           ),
@@ -88,16 +130,24 @@ class LogOutScreen extends StatelessWidget {
                               child: OutlinedButton(
                                 onPressed: Get.back,
                                 style: OutlinedButton.styleFrom(
-                                  side: BorderSide(color: Colors.white.withValues(alpha: .22)),
+                                  side: BorderSide(
+                                    color: isDark
+                                        ? Colors.white.withValues(alpha: .22)
+                                        : scheme.outlineVariant
+                                            .withValues(alpha: .80),
+                                  ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(14),
                                   ),
-                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 14),
                                 ),
                                 child: Text(
                                   'cancel'.tr,
-                                  style: const TextStyle(
-                                    color: Colors.white,
+                                  style: TextStyle(
+                                    color: isDark
+                                        ? Colors.white
+                                        : scheme.onSurface,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -115,7 +165,8 @@ class LogOutScreen extends StatelessWidget {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(14),
                                   ),
-                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 14),
                                   elevation: 0,
                                 ),
                                 child: Text(
@@ -142,18 +193,11 @@ class LogOutScreen extends StatelessWidget {
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(18),
-              gradient: LinearGradient(
-                colors: [
-                  Colors.white.withValues(alpha: .14),
-                  Colors.white.withValues(alpha: .06),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              border: Border.all(color: Colors.white.withValues(alpha: .16)),
+              gradient: cardGradient,
+              border: Border.all(color: cardBorderColor),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: .22),
+                  color: cardShadowColor,
                   blurRadius: 18,
                   offset: const Offset(0, 10),
                 ),
@@ -166,10 +210,14 @@ class LogOutScreen extends StatelessWidget {
                   height: 44,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: .12),
-                    border: Border.all(color: Colors.white.withValues(alpha: .12)),
+                    color: cardIconBg,
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: .12)
+                          : scheme.outlineVariant.withValues(alpha: .60),
+                    ),
                   ),
-                  child: const Icon(Icons.logout, color: Colors.white),
+                  child: Icon(Icons.logout, color: cardIconColor),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -177,10 +225,10 @@ class LogOutScreen extends StatelessWidget {
                     text: 'logout'.tr,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: cardTextColor,
                   ),
                 ),
-                Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: .7)),
+                Icon(Icons.chevron_right, color: chevronColor),
               ],
             ),
           ),

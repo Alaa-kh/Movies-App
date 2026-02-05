@@ -39,16 +39,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
         child: Column(
           children: [
             Container(
-              height: 350,
+              height: 310,
               width: double.infinity,
               decoration: const BoxDecoration(
                 color: mainClr,
                 borderRadius: BorderRadius.only(
-                  bottomRight: Radius.circular(400),
+                  bottomRight: Radius.circular(250),
                 ),
               ),
               child: Padding(
-                padding: const EdgeInsets.only(left: 18, top: 50),
+                padding: const EdgeInsets.only(right: 18,  left: 18, top: 50),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -75,6 +75,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 padding: const EdgeInsets.all(18),
                 child: Column(
                   children: [
+                    const SizedBox(height: 40),
                     AuthTextFormField(
                       hintText: 'enterName'.tr,
                       controller: _nameController,
@@ -159,7 +160,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    Text('or'.tr, style: const TextStyle(height: 2.5)),
+                    Text('or'.tr, style: const TextStyle(height: 2.5,color: mainClr)),
                     const SizedBox(height: 10),
                     SizedBox(
                       width: double.infinity,

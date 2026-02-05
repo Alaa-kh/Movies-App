@@ -41,30 +41,40 @@ class _ForgotScreenState extends State<ForgotScreen> {
               decoration: const BoxDecoration(
                 color: mainClr,
                 borderRadius: BorderRadius.only(
-                  bottomRight: Radius.circular(400),
+                  bottomRight: Radius.circular(250),
                 ),
               ),
               child: Padding(
-                padding: const EdgeInsets.only(left: 18, top: 50),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextUtils(
-                      text: 'forgot'.tr,
-                      color: Colors.white,
-                      fontSize: 45,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    const SizedBox(height: 10),
-                    TextUtils(
-                      text: 'password'.tr,
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ],
+                padding: const EdgeInsetsDirectional.only(
+                    start: 18, top: 50, end: 18),
+                child: RichText(
+                  textAlign: TextAlign.start,
+                  text: TextSpan(
+                    style: const TextStyle(fontFamily: 'Cairo'),
+                    children: [
+                      TextSpan(
+                        text: '${'forgot'.tr} ',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                          height: 1.1,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'password'.tr,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 40,
+                          fontWeight: FontWeight.normal,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
+
             ),
             Form(
               key: _formKey,
@@ -72,6 +82,7 @@ class _ForgotScreenState extends State<ForgotScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 18),
                 child: Column(
                   children: [
+                    const SizedBox(height: 40),
                     Lottie.asset(forgotAnimate, repeat: false),
                     AuthTextFormField(
                       hintText: 'enterEmail'.tr,

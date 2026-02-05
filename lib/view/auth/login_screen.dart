@@ -38,20 +38,20 @@ class _LogInScreenState extends State<LogInScreen> {
         child: Column(
           children: [
             Container(
-              height: 350,
+              height: 310,
               width: double.infinity,
               decoration: const BoxDecoration(
                 color: mainClr,
-                borderRadius: BorderRadius.only(
-                  bottomRight: Radius.circular(400),
+                borderRadius: BorderRadiusDirectional.only(
+                  bottomStart: Radius.circular(250),
                 ),
               ),
               child: Padding(
-                padding: const EdgeInsets.only(left: 18, top: 50),
+                padding: const EdgeInsets.only(right: 18, top: 50, left: 18),
                 child: TextUtils(
                   text: 'logIn'.tr,
                   color: Colors.white,
-                  fontSize: 45,
+                  fontSize: 40,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -62,6 +62,7 @@ class _LogInScreenState extends State<LogInScreen> {
                 padding: const EdgeInsets.all(18),
                 child: Column(
                   children: [
+                    const SizedBox(height: 40),
                     AuthTextFormField(
                       hintText: 'enterEmail'.tr,
                       controller: _emailController,
@@ -152,7 +153,7 @@ class _LogInScreenState extends State<LogInScreen> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    Text('or'.tr, style: const TextStyle(height: 2.5)),
+                    Text('or'.tr, style: const TextStyle(height: 2.5,color: mainClr)),
                     const SizedBox(height: 10),
                     SizedBox(
                       width: double.infinity,

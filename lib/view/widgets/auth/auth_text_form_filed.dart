@@ -85,14 +85,16 @@ class _AuthTextFormFieldState extends State<AuthTextFormField> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    const fillColor = Color(0xFFF6F7FB);
+    const textColor = Color(0xFF111827);
+    const hintColor = Color(0xFF9CA3AF);
 
     final borderRadius = BorderRadius.circular(16);
 
     final enabledBorder = OutlineInputBorder(
       borderRadius: borderRadius,
-      borderSide: BorderSide(
-        color: scheme.outlineVariant.withOpacity(.7),
+      borderSide: const BorderSide(
+        color: Color(0xFFE5E7EB),
         width: 1,
       ),
     );
@@ -100,7 +102,7 @@ class _AuthTextFormFieldState extends State<AuthTextFormField> {
     final focusedBorder = OutlineInputBorder(
       borderRadius: borderRadius,
       borderSide: BorderSide(
-        color: scheme.primary,
+        color: mainClr.withOpacity(.95),
         width: 1.4,
       ),
     );
@@ -108,10 +110,11 @@ class _AuthTextFormFieldState extends State<AuthTextFormField> {
     final errorBorder = OutlineInputBorder(
       borderRadius: borderRadius,
       borderSide: BorderSide(
-        color: scheme.error,
+        color: Colors.red.shade400,
         width: 1.2,
       ),
     );
+const errorColor = Colors.red;
 
     final direction = _textDirection ?? Directionality.of(context);
 
@@ -122,7 +125,7 @@ class _AuthTextFormFieldState extends State<AuthTextFormField> {
           borderRadius: borderRadius,
           boxShadow: [
             BoxShadow(
-              color: gryClr.withOpacity(.16),
+              color: gryClr.withOpacity(.12),
               blurRadius: 14,
               offset: const Offset(0, 10),
             ),
@@ -137,24 +140,33 @@ class _AuthTextFormFieldState extends State<AuthTextFormField> {
           validator: widget.validator,
           autovalidateMode: AutovalidateMode.onUserInteraction,
           onFieldSubmitted: widget.onSubmitted,
-          style: TextStyle(
-            color: scheme.onSurface,
+          style: const TextStyle(
+            color: textColor,
             fontSize: 14.5,
             fontWeight: FontWeight.w600,
           ),
           decoration: InputDecoration(
+            errorStyle: const TextStyle(
+              color: errorColor,
+              height: 1.2,
+            ),
             filled: true,
-            fillColor: scheme.surface,
-            prefixIcon: widget.prefixIcon,
+            fillColor: fillColor,
+            prefixIcon: IconTheme(
+              data: const IconThemeData(color: gryClr),
+              child: widget.prefixIcon,
+            ),
             suffixIcon: widget.suffixIcon,
             hintText: widget.hintText,
-            hintStyle: TextStyle(
-              color: scheme.onSurfaceVariant.withOpacity(.7),
+            hintStyle: const TextStyle(
+              color: hintColor,
               fontSize: 13,
               fontWeight: FontWeight.w500,
             ),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 14,
+            ),
             border: enabledBorder,
             enabledBorder: enabledBorder,
             focusedBorder: focusedBorder,
