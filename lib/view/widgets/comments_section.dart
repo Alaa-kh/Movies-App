@@ -50,7 +50,7 @@ class _CommentsSectionState extends State<CommentsSection> {
               return Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: Text(
-                  'Failed to load comments: ${snap.error}',
+                  'failed_to_load_comments: ${snap.error}'.tr,
                   style: TextStyle(color: scheme.error),
                 ),
               );
@@ -109,7 +109,7 @@ class _CommentsSectionState extends State<CommentsSection> {
         Row(
           children: [
             Expanded(
-              child: TextField(
+              child: TextField(             
                 controller: _text,
                 minLines: 1,
                 maxLines: 4,
@@ -119,31 +119,63 @@ class _CommentsSectionState extends State<CommentsSection> {
               ),
             ),
             const SizedBox(width: 10),
-            Obx(() {
-              return FilledButton(
-                onPressed: _sending.value
-                    ? null
-                    : () async {
-                        final value = _text.text.trim();
-                        if (value.isEmpty) return;
+          Obx(() {
+              final isSending = _sending.value;
 
-                        try {
-                          _sending.value = true;
-                          await _ctr.add(
-                            type: widget.type,
-                            id: widget.id,
-                            text: value,
-                          );
-                          _text.clear();
-                        } catch (e) {
-                          Get.snackbar('Error', e.toString());
-                        } finally {
-                          _sending.value = false;
-                        }
-                      },
-                child: Text('send'.tr),
+              return SizedBox(
+                height: 56,
+                width: 56,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(             
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                    padding: EdgeInsets.zero,
+                  ),
+                  onPressed: isSending
+                      ? null
+                      : () async {
+                          final value = _text.text.trim();
+                          if (value.isEmpty) return;
+
+                          try {
+                            _sending.value = true;
+                            await _ctr.add(
+                              type: widget.type,
+                              id: widget.id,
+                              text: value,
+                            );
+                            _text.clear();
+                          } catch (e) {
+                            Get.snackbar('error'.tr, e.toString());
+                          } finally {
+                            _sending.value = false;
+                          }
+                        },
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 160),
+                    child: isSending
+                        ? const SizedBox(
+                            key: ValueKey('loading'),
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.4,
+                              valueColor: AlwaysStoppedAnimation(Colors.white),
+                            ),
+                          )
+                        :  Icon(
+                            Icons.send_rounded,
+                            key: ValueKey('icon'),
+                            color: scheme.onSurfaceVariant,
+                            size: 22,
+                          ),
+                  ),
+                ),
               );
-            }),
+            })
+
           ],
         ),
       ],

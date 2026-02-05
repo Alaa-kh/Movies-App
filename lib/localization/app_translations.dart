@@ -42,6 +42,11 @@ class AppTranslations extends Translations {
           'Email_required': 'Email is required',
           'invalid_email': 'Invalid email',
           'enter_valid_name': 'Enter a valid name',
+          'open_on_youtube': 'Open on YouTube',
+          'try_another': 'Try another',
+          'trailer_unavailable': 'Trailer unavailable here',
+          'failed_to_load_comments': 'Failed to load comments',
+          'erroe': 'Error'
         },
         'ar_SA': {
           'appName': 'تطبيق الأفلام',
@@ -82,6 +87,11 @@ class AppTranslations extends Translations {
           'Email_required': 'الايميل مطلوب',
           'invalid_email': 'البريد الإلكتروني غير صالح',
           'enter_valid_name': 'أدخل اسمًا صحيحًا',
+          'open_on_youtube': 'فتح في يوتيوب',
+          'try_another': 'حاول مرة أخرى',
+          'trailer_unavailable': 'التريلر غير متاح هنا',
+          'failed_to_load_comments': 'فشل في تحميل التعليقات',
+          'error': 'خطأ'
         },
       };
 }

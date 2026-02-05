@@ -181,7 +181,7 @@ class _TrailerSectionState extends State<TrailerSection> {
   }
 
   void _openYoutubeInApp(String videoId) {
-    Get.to(() => YoutubeWebViewPage(videoId: videoId, title: 'Trailer'));
+    Get.to(() => YoutubeWebViewPage(videoId: videoId, title: 'trailer'.tr));
   }
 
   Future<void> _retry() async {
@@ -242,7 +242,7 @@ class _TrailerSectionState extends State<TrailerSection> {
                       size: 56, color: Colors.white),
                   const SizedBox(height: 10),
                   Text(
-                    'Trailer unavailable here',
+                    'trailer_unavailable'.tr,
                     style: TextStyle(
                       color: Colors.white.withOpacity(.92),
                       fontWeight: FontWeight.w800,
@@ -257,13 +257,13 @@ class _TrailerSectionState extends State<TrailerSection> {
                             ? null
                             : () => _openYoutubeInApp(first),
                         icon: const Icon(Icons.open_in_new),
-                        label: const Text('Open on YouTube'),
+                        label: Text('open_on_youtube'.tr),
                       ),
                       const SizedBox(width: 10),
                       OutlinedButton.icon(
                         onPressed: _retry,
                         icon: const Icon(Icons.refresh),
-                        label: const Text('Try another'),
+                        label: Text('try_another'.tr),
                       ),
                     ],
                   ),
@@ -293,7 +293,7 @@ class _TrailerSectionState extends State<TrailerSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Trailer',
+          'trailer'.tr,
           style: TextStyle(
             color: scheme.onSurface,
             fontSize: 16,
@@ -322,9 +322,18 @@ class _TrailerSectionState extends State<TrailerSection> {
                   Positioned(
                     right: 10,
                     bottom: 10,
-                    child: FilledButton(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12,                        ),
+                      ),
                       onPressed: () => _openYoutubeInApp(id),
-                      child: const Text('Open on YouTube'),
+                      child: Text('open_on_youtube'.tr),
+                      
                     ),
                   ),
               ],

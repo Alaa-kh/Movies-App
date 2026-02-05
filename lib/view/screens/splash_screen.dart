@@ -22,10 +22,9 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: scheme.surface,
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Center(
           child: Column(
@@ -36,7 +35,7 @@ class _SplashScreenState extends State<SplashScreen> {
               Text(
                 'appName'.tr,
                 style: TextStyle(
-                  color: scheme.onSurface,
+                  color:Colors.black.withOpacity(.8),
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
                 ),
