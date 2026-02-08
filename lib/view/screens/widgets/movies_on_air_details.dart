@@ -52,8 +52,8 @@ class MoviesOnAirDetails extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.black.withOpacity(.35),
-                  Colors.black.withOpacity(.92),
+                  Colors.black.withValues(alpha: .35),
+                  Colors.black.withValues(alpha: .92),
                 ],
               ),
             ),
@@ -91,7 +91,7 @@ class MoviesOnAirDetails extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: scheme.surface.withOpacity(.70),
+                          color: scheme.surface.withValues(alpha: .70),
                           borderRadius: BorderRadius.circular(18),
                         ),
                         child: Column(

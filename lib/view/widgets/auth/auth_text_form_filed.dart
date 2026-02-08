@@ -102,7 +102,7 @@ class _AuthTextFormFieldState extends State<AuthTextFormField> {
     final focusedBorder = OutlineInputBorder(
       borderRadius: borderRadius,
       borderSide: BorderSide(
-        color: mainClr.withOpacity(.95),
+        color: mainClr.withValues(alpha: .95),
         width: 1.4,
       ),
     );
@@ -125,7 +125,7 @@ const errorColor = Colors.red;
           borderRadius: borderRadius,
           boxShadow: [
             BoxShadow(
-              color: gryClr.withOpacity(.12),
+              color: gryClr.withValues(alpha: .12),
               blurRadius: 14,
               offset: const Offset(0, 10),
             ),

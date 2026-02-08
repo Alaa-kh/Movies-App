@@ -218,7 +218,7 @@ Future<void> _loadCandidates() async {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        color: scheme.surfaceContainerHighest.withOpacity(.35),
+        color: scheme.surfaceContainerHighest.withValues(alpha: .35),
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
@@ -234,8 +234,8 @@ Future<void> _loadCandidates() async {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withOpacity(.15),
-                    Colors.black.withOpacity(.75),
+                    Colors.black.withValues(alpha: .15),
+                    Colors.black.withValues(alpha: .75),
                   ],
                 ),
               ),
@@ -252,7 +252,7 @@ Future<void> _loadCandidates() async {
                   Text(
                     'trailer_unavailable'.tr,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(.92),
+                      color: Colors.white.withValues(alpha: .92),
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -322,7 +322,7 @@ Future<void> _loadCandidates() async {
                   _fallback(context),
                 if (_loading)
                   Container(
-                    color: Colors.black.withOpacity(.35),
+                    color: Colors.black.withValues(alpha: .35),
                     alignment: Alignment.center,
                     child: const CircularProgressIndicator(),
                   ),

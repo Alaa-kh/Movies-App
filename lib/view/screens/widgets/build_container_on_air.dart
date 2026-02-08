@@ -35,8 +35,8 @@ class BuildContainerOnAir extends StatelessWidget {
         clipBehavior: Clip.hardEdge,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
-          color: scheme.surfaceContainerHighest.withOpacity(.35),
-          border: Border.all(color: scheme.outlineVariant.withOpacity(.35)),
+          color: scheme.surfaceContainerHighest.withValues(alpha: .35),
+          border: Border.all(color: scheme.outlineVariant.withValues(alpha: .35)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

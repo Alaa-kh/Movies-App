@@ -49,7 +49,7 @@ class FavorieScreen extends StatelessWidget {
             );
           },
           separatorBuilder: (context, index) => Divider(
-            color: scheme.outlineVariant.withOpacity(.5),
+            color: scheme.outlineVariant.withValues(alpha: .5),
             thickness: .6,
             height: 18,
           ),
