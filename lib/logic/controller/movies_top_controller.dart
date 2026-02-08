@@ -11,6 +11,7 @@ class MoviesTopRatedController extends GetxController {
 
   late final Worker _localeWorker;
 
+  /// Sets up locale listener and triggers the initial top-rated fetch.
   @override
   void onInit() {
     super.onInit();
@@ -19,12 +20,14 @@ class MoviesTopRatedController extends GetxController {
     reload();
   }
 
+  /// Disposes the locale worker when the controller is removed.
   @override
   void onClose() {
     _localeWorker.dispose();
     super.onClose();
   }
 
+  /// Fetches top-rated movies based on the current locale and updates the list.
   Future<void> reload() async {
     final localeCtrl = Get.find<LocaleController>();
     try {

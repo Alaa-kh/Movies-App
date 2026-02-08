@@ -15,6 +15,14 @@ String? buildTmdbImageUrl(String? path, {String size = 'w780'}) {
   return '$tmdbImageBaseUrl$size$normalized';
 }
 
+MediaType _detectMediaType(dynamic item) {
+  try {
+    final name = item.name as String?;
+    if (name != null && name.trim().isNotEmpty) return MediaType.tv;
+  } catch (_) {}
+  return MediaType.movie;
+}
+
 class MovieDetails extends StatelessWidget {
   const MovieDetails({
     super.key,
@@ -27,8 +35,11 @@ class MovieDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
 
+    final mediaType = _detectMediaType(getMovies);
+
     final id = getMovies.id as int;
-    final title = (getMovies.title as String?) ?? '';
+    final title =
+        (getMovies.title as String?) ?? (getMovies.name as String?) ?? '';
     final posterPath = getMovies.posterPath as String?;
     final overview = (getMovies.overview as String?) ?? '';
     final vote = (getMovies.voteAverage as num?)?.toDouble() ?? 0;
@@ -137,7 +148,7 @@ class MovieDetails extends StatelessWidget {
                             ),
                             const SizedBox(height: 18),
                             TrailerSection(
-                              type: MediaType.movie,
+                              type: mediaType,
                               id: id,
                               posterUrl: posterUrl,
                             ),
@@ -151,7 +162,7 @@ class MovieDetails extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 10),
-                            CommentsSection(type: MediaType.movie, id: id),
+                            CommentsSection(type: mediaType, id: id),
                           ],
                         ),
                       ),

@@ -13,9 +13,13 @@ class MoviesOnAirController extends GetxController {
   final isLoading = false.obs;
   final query = ''.obs;
 
+  final hasLoadedOnce = false.obs;
+  final errorMessage = RxnString();
+
   final _storage = GetStorage();
   late final Worker _localeWorker;
 
+  /// Initializes favorites, listens to locale changes, and triggers the initial load.
   @override
   void onInit() {
     super.onInit();
@@ -34,21 +38,26 @@ class MoviesOnAirController extends GetxController {
     reload();
   }
 
+  /// Disposes the locale worker when the controller is removed.
   @override
   void onClose() {
     _localeWorker.dispose();
     super.onClose();
   }
 
+  /// Updates the search query and filters the current list.
   void setQuery(String v) {
     query.value = v;
     _applySearch();
   }
-Future<void> reload() async {
+
+  /// Fetches on-air movies from the service and updates local state.
+  Future<void> reload() async {
     final localeCtrl = Get.find<LocaleController>();
     final currentQuery = query.value;
 
     isLoading.value = true;
+    errorMessage.value = null;
 
     try {
       final data = await MoviesOnAirServices.getMoviesOnAir(
@@ -67,13 +76,16 @@ Future<void> reload() async {
       if (isClosed) return;
       moviesOnAirList.clear();
       searchList.clear();
-      Get.snackbar('Error', e.toString());
+      errorMessage.value = e.toString();
     } finally {
-      if (!isClosed) isLoading.value = false;
+      if (!isClosed) {
+        hasLoadedOnce.value = true;
+        isLoading.value = false;
+      }
     }
   }
 
-
+  /// Filters moviesOnAirList into searchList based on the current query.
   void _applySearch() {
     final q = query.value.trim().toLowerCase();
     if (q.isEmpty) {
@@ -86,16 +98,19 @@ Future<void> reload() async {
     );
   }
 
+  /// Clears the search query and resets searchList.
   void clearSearch() {
     query.value = '';
     searchList.clear();
   }
 
+  /// Persists the current favoriteList to local storage.
   Future<void> _persistFavorites() async {
     final list = favoriteList.map((e) => e.toJson()).toList();
     await _storage.write('isFavoritesList', list);
   }
 
+  /// Toggles a movie in favorites and persists the updated list.
   Future<void> favoriteMovie(int movieId) async {
     final existingIndex = favoriteList.indexWhere((e) => e.id == movieId);
 
@@ -112,6 +127,7 @@ Future<void> reload() async {
     await _persistFavorites();
   }
 
+  /// Checks whether a movie is currently marked as favorite.
   bool isFavorite(int movieId) {
     return favoriteList.any((e) => e.id == movieId);
   }

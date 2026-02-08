@@ -26,6 +26,7 @@ class MoviesController extends GetxController {
     const LogOutScreen(),
   ].obs;
 
+  /// Sets up locale listener and triggers the initial data load.
   @override
   void onInit() {
     super.onInit();
@@ -34,6 +35,7 @@ class MoviesController extends GetxController {
     reload();
   }
 
+  /// Disposes workers/controllers to avoid memory leaks.
   @override
   void onClose() {
     _localeWorker.dispose();
@@ -41,6 +43,7 @@ class MoviesController extends GetxController {
     super.onClose();
   }
 
+  /// Fetches movies based on the current locale and refreshes lists.
   Future<void> reload() async {
     final localeCtrl = Get.find<LocaleController>();
     try {
@@ -59,6 +62,7 @@ class MoviesController extends GetxController {
     }
   }
 
+  /// Filters movieList into searchList using the provided search string.
   void addSearchToList(String searchName) {
     final q = searchName.toLowerCase().trim();
     if (q.isEmpty) {
@@ -75,6 +79,7 @@ class MoviesController extends GetxController {
     update();
   }
 
+  /// Clears the search field and resets searchList.
   void clearSearch() {
     searchTextController.clear();
     addSearchToList('');

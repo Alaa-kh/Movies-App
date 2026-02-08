@@ -13,15 +13,18 @@ class AuthController extends GetxController {
   FirebaseAuth auth = FirebaseAuth.instance;
   bool isVisibility = false;
 
+  /// Toggles password visibility state and refreshes UI.
   void visibility() {
     isVisibility = !isVisibility;
     update();
   }
 
-  void signUpUsingFirebase(
-      {required String name,
-      required String email,
-      required String password}) async {
+  /// Creates a new Firebase user, updates display name, and navigates to main screen.
+  void signUpUsingFirebase({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
     try {
       await auth
           .createUserWithEmailAndPassword(
@@ -46,20 +49,29 @@ class AuthController extends GetxController {
         message = error.message.toString();
       }
 
-      Get.snackbar(title, message,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        title,
+        message,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } catch (error) {
-      Get.snackbar('Error !', error.toString(),
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        'Error !',
+        error.toString(),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
   }
 
-  void logInUsingFirebase(
-      {required String email, required String password}) async {
+  /// Signs in with Firebase, persists auth state, navigates, and triggers a local notification.
+  void logInUsingFirebase({
+    required String email,
+    required String password,
+  }) async {
     try {
       await auth
           .signInWithEmailAndPassword(email: email, password: password)
@@ -88,18 +100,25 @@ class AuthController extends GetxController {
         message = error.message.toString();
       }
 
-      Get.snackbar(title, message,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        title,
+        message,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } catch (error) {
-      Get.snackbar('Error !', error.toString(),
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        'Error !',
+        error.toString(),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
   }
 
+  /// Sends a password reset email and navigates back on success.
   void resetPassword(String email) async {
     try {
       await auth.sendPasswordResetEmail(email: email);
@@ -116,15 +135,21 @@ class AuthController extends GetxController {
         message = error.message.toString();
       }
 
-      Get.snackbar(title, message,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        title,
+        message,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } catch (error) {
-      Get.snackbar('Error !', error.toString(),
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        'Error !',
+        error.toString(),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
   }
 }

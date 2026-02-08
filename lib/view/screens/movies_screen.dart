@@ -19,7 +19,7 @@ class _MoviesScreenState extends State<MoviesScreen> {
   late final MoviesOnAirController controller;
   late final TextEditingController _searchCtr;
 
-@override
+  @override
   void initState() {
     super.initState();
 
@@ -29,8 +29,11 @@ class _MoviesScreenState extends State<MoviesScreen> {
 
     _searchCtr = TextEditingController(text: controller.query.value);
     _searchCtr.addListener(() => controller.setQuery(_searchCtr.text));
-  }
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.reload();
+    });
+  }
 
   @override
   void dispose() {
@@ -52,6 +55,18 @@ class _MoviesScreenState extends State<MoviesScreen> {
     if (w >= 700) return 310;
     if (w >= 520) return 300;
     return 290;
+  }
+
+  Widget _statusSliver({
+    required double topPadding,
+    required Widget child,
+  }) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: EdgeInsets.only(top: topPadding),
+        child: Center(child: child),
+      ),
+    );
   }
 
   @override
@@ -100,25 +115,38 @@ class _MoviesScreenState extends State<MoviesScreen> {
               ),
             ),
             Obx(() {
-              if (controller.isLoading.value) {
-                return const SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 40),
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
+              final isFirstLoad =
+                  !controller.hasLoadedOnce.value && controller.isLoading.value;
+
+              if (isFirstLoad) {
+                return _statusSliver(
+                  topPadding: 40,
+                  child: CircularProgressIndicator(),
                 );
               }
 
-              if (controller.searchList.isEmpty &&
-                  controller.query.value.trim().isNotEmpty) {
+              if (!controller.isLoading.value &&
+                  controller.moviesOnAirList.isEmpty) {
+                return _statusSliver(
+                  topPadding: 40,
+                  child: Text(
+                    'No data available',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ).fadeUp(),
+                );
+              }
+
+              final isSearching = controller.query.value.trim().isNotEmpty;
+
+              if (isSearching && controller.searchList.isEmpty) {
                 return SliverToBoxAdapter(
                   child: Center(child: Lottie.asset(emptyAnimate)),
                 );
               }
 
-              final list = controller.searchList.isEmpty
-                  ? controller.moviesOnAirList
-                  : controller.searchList;
+              final list = isSearching
+                  ? controller.searchList
+                  : controller.moviesOnAirList;
 
               return SliverPadding(
                 padding: EdgeInsets.symmetric(horizontal: edge),

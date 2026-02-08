@@ -89,8 +89,7 @@ class _TrailerSectionState extends State<TrailerSection> {
       await c.close();
     }
   }
-
-  Future<void> _loadCandidates() async {
+Future<void> _loadCandidates() async {
     final t = ++_token;
 
     setState(() {
@@ -98,33 +97,42 @@ class _TrailerSectionState extends State<TrailerSection> {
       _failed = false;
     });
 
-    final locale = Get.find<LocaleController>();
-    final videos = await _service.fetchTrailerCandidates(
-      type: widget.type,
-      id: widget.id,
-      language: locale.tmdbLanguage,
-      max: 10,
-    );
+    try {
+      final locale = Get.find<LocaleController>();
+      final videos = await _service.fetchTrailerCandidates(
+        type: widget.type,
+        id: widget.id,
+        language: locale.tmdbLanguage,
+        max: 10,
+      );
 
-    if (!mounted || t != _token) return;
+      if (!mounted || t != _token) return;
 
-    final keys = videos.map((e) => e.key).where((e) => e.isNotEmpty).toList();
+      final keys = videos.map((e) => e.key).where((e) => e.isNotEmpty).toList();
 
-    if (keys.isEmpty) {
+      if (keys.isEmpty) {
+        setState(() {
+          _candidates = const [];
+          _loading = false;
+          _failed = true;
+        });
+        return;
+      }
+
+      setState(() {
+        _candidates = keys;
+        _index = 0;
+      });
+
+      await _attachCurrent(token: t);
+    } catch (_) {
+      if (!mounted || t != _token) return;
       setState(() {
         _candidates = const [];
         _loading = false;
         _failed = true;
       });
-      return;
     }
-
-    setState(() {
-      _candidates = keys;
-      _index = 0;
-    });
-
-    await _attachCurrent(token: t);
   }
 
   Future<void> _attachCurrent({required int token}) async {

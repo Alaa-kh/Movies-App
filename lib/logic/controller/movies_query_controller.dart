@@ -10,6 +10,7 @@ class MoviesQueryController extends GetxController {
 
   late final Worker _localeWorker;
 
+  /// Sets up locale listener and triggers the initial query fetch.
   @override
   void onInit() {
     super.onInit();
@@ -18,12 +19,14 @@ class MoviesQueryController extends GetxController {
     reload();
   }
 
+  /// Disposes the locale worker when the controller is removed.
   @override
   void onClose() {
     _localeWorker.dispose();
     super.onClose();
   }
 
+  /// Fetches movies by query for the current locale and updates the list.
   Future<void> reload({String query = 'hell'}) async {
     final localeCtrl = Get.find<LocaleController>();
 
