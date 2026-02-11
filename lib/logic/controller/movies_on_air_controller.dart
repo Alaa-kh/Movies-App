@@ -17,14 +17,15 @@ class MoviesOnAirController extends GetxController {
   final errorMessage = RxnString();
 
   final _storage = GetStorage();
-  late final Worker _localeWorker;
 
-  /// Initializes favorites, listens to locale changes, and triggers the initial load.
+  Worker? _localeWorker;
+  bool _reloading = false;
+
   @override
   void onInit() {
     super.onInit();
 
-    final stored = _storage.read<List>('isFavoritesList');
+    final stored = _storage.read<List<dynamic>>('isFavoritesList');
     if (stored != null) {
       final items = stored.whereType<Map>().map((e) {
         return Result.fromJson(Map<String, dynamic>.from(e));
@@ -33,39 +34,42 @@ class MoviesOnAirController extends GetxController {
     }
 
     final localeCtrl = Get.find<LocaleController>();
-    _localeWorker = ever(localeCtrl.localeRx, (_) => reload());
-
-    reload();
+    _localeWorker = ever(localeCtrl.localeRx, (_) => reload(force: true));
   }
 
-  /// Disposes the locale worker when the controller is removed.
+  @override
+  void onReady() {
+    super.onReady();
+    reload(force: true);
+  }
+
   @override
   void onClose() {
-    _localeWorker.dispose();
+    _localeWorker?.dispose();
     super.onClose();
   }
 
-  /// Updates the search query and filters the current list.
   void setQuery(String v) {
     query.value = v;
     _applySearch();
   }
 
-  /// Fetches on-air movies from the service and updates local state.
-  Future<void> reload() async {
-    final localeCtrl = Get.find<LocaleController>();
+  Future<void> reload({bool force = false}) async {
+    if (_reloading && !force) return;
+    _reloading = true;
+
     final currentQuery = query.value;
 
     isLoading.value = true;
     errorMessage.value = null;
 
     try {
+      final localeCtrl = Get.find<LocaleController>();
+
       final data = await MoviesOnAirServices.getMoviesOnAir(
         language: localeCtrl.tmdbLanguage,
         page: 1,
       ).timeout(const Duration(seconds: 20));
-
-      if (isClosed) return;
 
       final model = getMoviesOnAirModelFromJson(jsonEncode(data));
       moviesOnAirList.assignAll(model.results);
@@ -73,19 +77,16 @@ class MoviesOnAirController extends GetxController {
       query.value = currentQuery;
       _applySearch();
     } catch (e) {
-      if (isClosed) return;
       moviesOnAirList.clear();
       searchList.clear();
       errorMessage.value = e.toString();
     } finally {
-      if (!isClosed) {
-        hasLoadedOnce.value = true;
-        isLoading.value = false;
-      }
+      hasLoadedOnce.value = true;
+      isLoading.value = false;
+      _reloading = false;
     }
   }
 
-  /// Filters moviesOnAirList into searchList based on the current query.
   void _applySearch() {
     final q = query.value.trim().toLowerCase();
     if (q.isEmpty) {
@@ -94,23 +95,22 @@ class MoviesOnAirController extends GetxController {
     }
 
     searchList.assignAll(
-      moviesOnAirList.where((m) => m.name.toLowerCase().contains(q)),
+      moviesOnAirList.where(
+        (m) => (m.name).toLowerCase().contains(q),
+      ),
     );
   }
 
-  /// Clears the search query and resets searchList.
   void clearSearch() {
     query.value = '';
     searchList.clear();
   }
 
-  /// Persists the current favoriteList to local storage.
   Future<void> _persistFavorites() async {
     final list = favoriteList.map((e) => e.toJson()).toList();
     await _storage.write('isFavoritesList', list);
   }
 
-  /// Toggles a movie in favorites and persists the updated list.
   Future<void> favoriteMovie(int movieId) async {
     final existingIndex = favoriteList.indexWhere((e) => e.id == movieId);
 
@@ -127,7 +127,6 @@ class MoviesOnAirController extends GetxController {
     await _persistFavorites();
   }
 
-  /// Checks whether a movie is currently marked as favorite.
   bool isFavorite(int movieId) {
     return favoriteList.any((e) => e.id == movieId);
   }

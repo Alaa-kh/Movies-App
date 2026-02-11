@@ -29,10 +29,6 @@ class _MoviesScreenState extends State<MoviesScreen> {
 
     _searchCtr = TextEditingController(text: controller.query.value);
     _searchCtr.addListener(() => controller.setQuery(_searchCtr.text));
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.reload();
-    });
   }
 
   @override
@@ -57,15 +53,10 @@ class _MoviesScreenState extends State<MoviesScreen> {
     return 290;
   }
 
-  Widget _statusSliver({
-    required double topPadding,
-    required Widget child,
-  }) {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: EdgeInsets.only(top: topPadding),
-        child: Center(child: child),
-      ),
+  Widget _statusSliver({required Widget child}) {
+    return SliverFillRemaining(
+      hasScrollBody: false,
+      child: Center(child: child),
     );
   }
 
@@ -119,16 +110,33 @@ class _MoviesScreenState extends State<MoviesScreen> {
                   !controller.hasLoadedOnce.value && controller.isLoading.value;
 
               if (isFirstLoad) {
+                return _statusSliver(child: const CircularProgressIndicator());
+              }
+
+              final err = controller.errorMessage.value;
+              if (err != null && controller.moviesOnAirList.isEmpty) {
                 return _statusSliver(
-                  topPadding: 40,
-                  child: CircularProgressIndicator(),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        err,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 12),
+                      FilledButton(
+                        onPressed: controller.reload,
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ).fadeUp(),
                 );
               }
 
               if (!controller.isLoading.value &&
                   controller.moviesOnAirList.isEmpty) {
                 return _statusSliver(
-                  topPadding: 40,
                   child: Text(
                     'No data available',
                     style: Theme.of(context).textTheme.titleMedium,
