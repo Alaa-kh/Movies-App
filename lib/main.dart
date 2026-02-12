@@ -12,7 +12,7 @@ import 'package:movies/theme/app_theme.dart';
 
 import 'firebase_options.dart';
 import 'notification.dart';
-//
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
